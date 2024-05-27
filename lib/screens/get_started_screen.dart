@@ -1,6 +1,4 @@
 import 'package:dekora/global_variables.dart';
-import 'package:dekora/screens/login_screen.dart';
-import 'package:dekora/screens/sign_up_screen.dart';
 import 'package:flutter/material.dart';
 
 class GetStartedScreen extends StatelessWidget {
