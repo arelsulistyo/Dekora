@@ -11,18 +11,4 @@ class GlobalVariables {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
-
-  // Text Styles
-  static const TextStyle logoTextStyle = TextStyle(
-    fontFamily: 'Laviossa',
-    fontSize: 48,
-    fontWeight: FontWeight.bold,
-    color: primaryColor,
-  );
-
-  static const TextStyle bodyTextStyle = TextStyle(
-    fontFamily: 'SF Pro Display',
-    fontSize: 24,
-    color: primaryColor,
-  );
 }

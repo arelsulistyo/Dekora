@@ -1,3 +1,6 @@
+import 'package:dekora/global_variables.dart';
+import 'package:dekora/screens/login_screen.dart';
+import 'package:dekora/screens/sign_up_screen.dart';
 import 'package:flutter/material.dart';
 
 class GetStartedScreen extends StatelessWidget {
@@ -10,7 +13,7 @@ class GetStartedScreen extends StatelessWidget {
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
-                'assets/images/get_started_background.png'), // Replace with your image asset
+                'assets/images/get_started_bg.png'), // Replace with your image asset
             fit: BoxFit.cover,
           ),
         ),
@@ -19,48 +22,94 @@ class GetStartedScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Get Started',
-                  style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.redAccent),
+                padding: EdgeInsets.symmetric(
+                    horizontal: 16.0), // Add horizontal padding
+                child: Align(
+                  alignment: Alignment.centerLeft, // Align text to the left
+                  child: Text(
+                    'Get Started',
+                    style: TextStyle(
+                        fontFamily: 'SF Pro Display',
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: GlobalVariables.primaryColor),
+                  ),
                 ),
               ),
               const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'Let\'s get your flowers ready!',
-                  style: TextStyle(fontSize: 16, color: Colors.redAccent),
+                padding: EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical:
+                        5.0), // Add horizontal padding and vertical padding
+                child: Align(
+                  alignment: Alignment.centerLeft, // Align text to the left
+                  child: Text(
+                    'Let\'s get your flowers ready!',
+                    style: TextStyle(
+                      fontFamily: 'SF Pro Display',
+                      fontSize: 20,
+                      color: GlobalVariables.primaryColor,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to Login
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              const SizedBox(height: 32),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 48.0), // Add horizontal padding
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Navigate to Login Page
+                      Navigator.pushNamed(context, '/login');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: GlobalVariables.primaryColor,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 50, vertical: 16),
+                    ),
+                    child: const Text(
+                      'Login',
+                      style: TextStyle(
+                        fontFamily: 'SF Pro Display',
+                        fontSize: 24,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-                child: const Text('Login'),
               ),
-              const SizedBox(height: 10),
-              OutlinedButton(
-                onPressed: () {
-                  // Navigate to Sign Up
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.redAccent,
-                  side: const BorderSide(color: Colors.redAccent),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+              const SizedBox(height: 18),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 48.0), // Add horizontal padding
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/sign_up');
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: GlobalVariables.primaryColor,
+                      side:
+                          const BorderSide(color: GlobalVariables.primaryColor),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 50, vertical: 15),
+                    ),
+                    child: const Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        fontFamily: 'SF Pro Display',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-                child: const Text('Sign Up'),
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 64),
             ],
           ),
         ),
