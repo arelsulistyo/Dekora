@@ -112,7 +112,7 @@ class GetStartedScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 100), // Increase margin at the bottom
+              const SizedBox(height: 60), // Increase margin at the bottom
             ],
           ),
         ),
