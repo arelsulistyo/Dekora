@@ -20,10 +20,9 @@ class GetStartedScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: 16.0), // Add horizontal padding
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Align(
-                  alignment: Alignment.centerLeft, // Align text to the left
+                  alignment: Alignment.centerLeft,
                   child: Text(
                     'Get Started',
                     style: TextStyle(
@@ -35,10 +34,7 @@ class GetStartedScreen extends StatelessWidget {
                 ),
               ),
               const Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical:
-                        5.0), // Add horizontal padding and vertical padding
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),
                 child: Align(
                   alignment: Alignment.centerLeft, // Align text to the left
                   child: Text(
@@ -54,7 +50,8 @@ class GetStartedScreen extends StatelessWidget {
               const SizedBox(height: 32),
               Padding(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 48.0), // Add horizontal padding
+                  horizontal: 48.0,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -66,9 +63,13 @@ class GetStartedScreen extends StatelessWidget {
                       backgroundColor: GlobalVariables.primaryColor,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 50, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            16.0), // Adjust the button radius
+                      ),
                     ),
                     child: const Text(
-                      'Login',
+                      'Log in',
                       style: TextStyle(
                         fontFamily: 'SF Pro Display',
                         fontSize: 24,
@@ -95,6 +96,10 @@ class GetStartedScreen extends StatelessWidget {
                           const BorderSide(color: GlobalVariables.primaryColor),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 50, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                            16.0), // Adjust the button radius
+                      ),
                     ),
                     child: const Text(
                       'Sign Up',
@@ -107,7 +112,7 @@ class GetStartedScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 64),
+              const SizedBox(height: 100), // Increase margin at the bottom
             ],
           ),
         ),

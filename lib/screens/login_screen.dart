@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 120),
+              const SizedBox(height: 78),
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         child: const Text(
-                          'Sign In',
+                          'Log In',
                           style: TextStyle(
                             fontFamily: 'SF Pro Display',
                             fontSize: 24,
