@@ -15,46 +15,36 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Colors.white, // Background color to match the target design
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.keyboard_double_arrow_left,
-              color: GlobalVariables
-                  .primaryColor), // Change the icon color to white
+              color: GlobalVariables.primaryColor),
           onPressed: () {
-            // Handle back button press
             Navigator.pop(context);
           },
         ),
-        backgroundColor:
-            GlobalVariables.secondaryColor, // Red color for the AppBar
+        backgroundColor: GlobalVariables.secondaryColor,
       ),
       body: Stack(
         children: [
-          // Background image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                    'assets/images/login_bg.png'), // Replace with your image path
+                image: AssetImage('assets/images/login_bg.png'),
                 fit: BoxFit.fitWidth,
-                alignment:
-                    Alignment.bottomCenter, // Align the image to the bottom
+                alignment: Alignment.bottomCenter,
               ),
             ),
           ),
-          const SizedBox(
-              height: 20), // Adjusted space between the top container and form
-
+          const SizedBox(height: 20),
           Column(
             children: [
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
                 decoration: const BoxDecoration(
-                  color: GlobalVariables
-                      .secondaryColor, // Red color for the container
+                  color: GlobalVariables.secondaryColor,
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(16.0),
                     bottomRight: Radius.circular(16.0),
@@ -63,15 +53,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 0), // Reduced height to minimize the gap
+                    SizedBox(height: 0),
                     Text(
                       'Log in',
                       style: TextStyle(
                         fontFamily: 'SF Pro Display',
-                        fontSize: 32, // Adjusted size to match target design
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: GlobalVariables
-                            .primaryColor, // White color for the text
+                        color: GlobalVariables.primaryColor,
                       ),
                     ),
                     Text(
@@ -80,24 +69,20 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontFamily: 'SF Pro Display',
                         fontSize: 20,
                         fontWeight: FontWeight.normal,
-                        color: GlobalVariables
-                            .primaryColor, // White color for the text
+                        color: GlobalVariables.primaryColor,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(
-                  height:
-                      120), // Adjusted space between the top container and form
+              const SizedBox(height: 120),
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16.0),
                 padding: const EdgeInsets.all(32.0),
                 decoration: BoxDecoration(
-                  color: GlobalVariables
-                      .secondaryColor, // Light pink color for the container
-                  borderRadius: BorderRadius.circular(16.0), // Rounded corners
+                  color: GlobalVariables.secondaryColor,
+                  borderRadius: BorderRadius.circular(16.0),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -105,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Text(
                       'Welcome Back',
                       style: TextStyle(
-                        fontSize: 32, // Adjusted size to match target design
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: GlobalVariables.primaryColor,
                         fontFamily: 'SF Pro Display',
@@ -117,17 +102,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         labelText: 'Username',
                         labelStyle: TextStyle(
                           fontFamily: 'SF Pro Display',
-
-                          color: GlobalVariables
-                              .primaryColor, // Red color for the label
+                          color: GlobalVariables.primaryColor,
                         ),
                         focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: GlobalVariables
-                                  .primaryColor), // Red color for the focused border
+                          borderSide:
+                              BorderSide(color: GlobalVariables.primaryColor),
                         ),
-                        border:
-                            UnderlineInputBorder(), // Underline border to match target design
+                        border: UnderlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -137,17 +118,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         labelText: 'Password',
                         labelStyle: TextStyle(
                           fontFamily: 'SF Pro Display',
-
-                          color: GlobalVariables
-                              .primaryColor, // Red color for the label
+                          color: GlobalVariables.primaryColor,
                         ),
                         focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: GlobalVariables
-                                  .primaryColor), // Red color for the focused border
+                          borderSide:
+                              BorderSide(color: GlobalVariables.primaryColor),
                         ),
-                        border:
-                            UnderlineInputBorder(), // Underline border to match target design
+                        border: UnderlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -161,8 +138,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           Theme(
                             data: Theme.of(context).copyWith(
-                              unselectedWidgetColor: GlobalVariables
-                                  .primaryColor, // Red color for the checkbox
+                              unselectedWidgetColor:
+                                  GlobalVariables.primaryColor,
                             ),
                             child: Checkbox(
                               value: _rememberMe,
@@ -178,10 +155,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Text(
                             'Remember me',
                             style: TextStyle(
-                              fontFamily:
-                                  'SF Pro Display', // Ensuring consistent font
-                              color: GlobalVariables
-                                  .primaryColor, // Red color for the text
+                              fontFamily: 'SF Pro Display',
+                              color: GlobalVariables.primaryColor,
                             ),
                           ),
                           const Spacer(),
@@ -194,8 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: TextStyle(
                                 fontFamily: 'SF Pro Display',
                                 fontWeight: FontWeight.bold,
-                                color: GlobalVariables
-                                    .primaryColor, // Red color for the text
+                                color: GlobalVariables.primaryColor,
                               ),
                             ),
                           ),
@@ -207,14 +181,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Navigator.push(
-                          // context,
-                          // MaterialPageRoute(builder: (context) => NewPage()),
-                          // );
+                          // Navigator.push(context, MaterialPageRoute(builder: (context) => NewPage()));
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: GlobalVariables
-                              .primaryColor, // Red color for the button
+                          backgroundColor: GlobalVariables.primaryColor,
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16.0),
