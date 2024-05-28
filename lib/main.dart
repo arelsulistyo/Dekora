@@ -14,6 +14,7 @@ class DekoraApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Dekora Flower Rent',
       initialRoute: '/',
       routes: {

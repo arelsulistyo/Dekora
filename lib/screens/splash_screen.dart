@@ -47,32 +47,36 @@ class _SplashScreenState extends State<SplashScreen> {
                 _isDimmed ? Colors.black.withOpacity(0.7) : Colors.transparent,
           ),
           // Text Widgets
-          const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Dekora',
-                  style: TextStyle(
-                    fontFamily: 'Laviossa',
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: GlobalVariables
-                        .primaryColor, // Change to white for better visibility
+          Center(
+            child: ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                _isDimmed ? Colors.black.withOpacity(0.7) : Colors.transparent,
+                BlendMode.srcATop,
+              ),
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Dekora',
+                    style: TextStyle(
+                      fontFamily: 'Laviossa',
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: GlobalVariables.primaryColor,
+                    ),
                   ),
-                ),
-                SizedBox(height: 10), // Adding some space between texts
-                Text(
-                  'flower rent',
-                  style: TextStyle(
-                    fontFamily: 'SF Pro Display',
-                    fontSize: 20,
-                    fontStyle: FontStyle.italic,
-                    color: GlobalVariables
-                        .primaryColor, // Change to white for better visibility
+                  SizedBox(height: 10),
+                  Text(
+                    'flower rent',
+                    style: TextStyle(
+                      fontFamily: 'SF Pro Display',
+                      fontSize: 20,
+                      fontStyle: FontStyle.italic,
+                      color: GlobalVariables.primaryColor,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
