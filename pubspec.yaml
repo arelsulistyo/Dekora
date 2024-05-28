@@ -64,6 +64,7 @@ flutter:
   assets:
     - assets/images/splash_bg.png
     - assets/images/get_started_bg.png
+    - assets/images/login_bg.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
