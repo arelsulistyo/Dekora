@@ -5,7 +5,6 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _LoginScreenState createState() => _LoginScreenState();
 }
 
@@ -75,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 78),
+              const SizedBox(height: 120),
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -181,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => NewPage()));
+                          Navigator.pushReplacementNamed(context, '/home');
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: GlobalVariables.primaryColor,
@@ -191,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         child: const Text(
-                          'Log In',
+                          'Sign In',
                           style: TextStyle(
                             fontFamily: 'SF Pro Display',
                             fontSize: 24,

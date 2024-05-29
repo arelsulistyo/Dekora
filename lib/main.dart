@@ -3,6 +3,7 @@ import 'screens/splash_screen.dart';
 import 'screens/get_started_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/sign_up_screen.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const DekoraApp());
@@ -22,6 +23,7 @@ class DekoraApp extends StatelessWidget {
         '/get_started': (context) => const GetStartedScreen(),
         '/login': (context) => const LoginScreen(),
         '/sign_up': (context) => const SignUpScreen(),
+        '/home': (context) => const HomeScreen(),
       },
     );
   }
