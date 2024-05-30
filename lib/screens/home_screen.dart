@@ -1,76 +1,180 @@
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
+import 'package:dekora/models/flower_model.dart';
+import 'package:dekora/services/flower_service.dart';
+import 'package:dekora/widgets/custom_bottom_navigation_bar.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List<Flower> flowers = [];
+  List<Flower> filteredFlowers = [];
+  TextEditingController searchController = TextEditingController();
+  bool isLoading = true;
+  int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchFlowers();
+    searchController.addListener(() {
+      filterFlowers();
+    });
+  }
+
+  Future<void> fetchFlowers() async {
+    try {
+      List<Flower> fetchedFlowers = await FlowerService.fetchFlowers();
+      setState(() {
+        flowers = fetchedFlowers;
+        filteredFlowers = fetchedFlowers;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Failed to load flowers: $e');
+    }
+  }
+
+  void filterFlowers() {
+    List<Flower> _flowers = [];
+    _flowers.addAll(flowers);
+    if (searchController.text.isNotEmpty) {
+      _flowers.retainWhere((flower) {
+        String searchTerm = searchController.text.toLowerCase();
+        String flowerName = flower.name.toLowerCase();
+        return flowerName.contains(searchTerm);
+      });
+    }
+    setState(() {
+      filteredFlowers = _flowers;
+    });
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: GlobalVariables.primaryColor,
-        title: const Text('Dekora',
-            style: TextStyle(fontFamily: 'Laviossa', fontSize: 28)),
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Dekora',
+          style: TextStyle(
+            fontFamily: 'Laviossa',
+            fontSize: 28,
+            color: GlobalVariables.primaryColor,
+          ),
+        ),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.menu),
+          icon: const Icon(Icons.menu, color: GlobalVariables.primaryColor),
           onPressed: () {
             // Handle menu button press
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.shopping_cart),
+            icon: const Icon(Icons.person, color: GlobalVariables.primaryColor),
             onPressed: () {
-              // Handle cart button press
+              // Handle profile button press
             },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Hello, User!',
-                style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: GlobalVariables.primaryColor)),
-            const Text('Happy Renting :)',
-                style: TextStyle(
-                    fontSize: 20, color: GlobalVariables.primaryColor)),
-            const SizedBox(height: 20),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16.0,
-                mainAxisSpacing: 16.0,
-                children: List.generate(4, (index) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: GlobalVariables.primaryColor,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search',
+                    prefixIcon:
+                        Icon(Icons.search, color: GlobalVariables.primaryColor),
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16.0),
                     ),
-                    child: Image.asset(
-                      'assets/images/flower${index + 1}.png', // Replace with your image assets
-                      fit: BoxFit.cover,
-                    ),
-                  );
-                }),
-              ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Hello, User!',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: GlobalVariables.primaryColor,
+                  ),
+                ),
+                const Text(
+                  'Happy Renting :)',
+                  style: TextStyle(
+                      fontSize: 20, color: GlobalVariables.primaryColor),
+                ),
+                const SizedBox(height: 20),
+                isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Expanded(
+                        child: GridView.builder(
+                          padding: const EdgeInsets.only(bottom: 80),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 16.0,
+                            mainAxisSpacing: 16.0,
+                          ),
+                          itemCount: filteredFlowers.length,
+                          itemBuilder: (context, index) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: GlobalVariables.primaryColor,
+                                borderRadius: BorderRadius.circular(16.0),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16.0),
+                                child: AspectRatio(
+                                  aspectRatio:
+                                      1, // Adjust the aspect ratio as needed
+                                  child: Image.asset(
+                                    filteredFlowers[index].imageUrl,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+              ],
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: GlobalVariables.primaryColor,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Shop'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: CustomBottomNavigationBar(
+              selectedIndex: _selectedIndex,
+              onItemTapped: _onItemTapped,
+            ),
+          ),
         ],
       ),
     );
