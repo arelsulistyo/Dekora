@@ -22,6 +22,7 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   bool productProtection = false;
   bool isLoading = false;
+  String selectedShipping = 'Economic';
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +32,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     double expressShippingCost = 6.02;
     double servicesFee = 0.5;
 
-    double totalPayment = widget.price * widget.quantity + servicesFee + economicShippingCost;
+    double shippingCost = economicShippingCost;
+    if (selectedShipping == 'Regular') {
+      shippingCost = regularShippingCost;
+    } else if (selectedShipping == 'Express') {
+      shippingCost = expressShippingCost;
+    }
+
+    double totalPayment =
+        widget.price * widget.quantity + servicesFee + shippingCost;
     if (productProtection) {
       totalPayment += productProtectionCost * widget.quantity;
     }
@@ -41,7 +50,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.keyboard_double_arrow_left, color: GlobalVariables.primaryColor),
+          icon: const Icon(Icons.keyboard_double_arrow_left,
+              color: GlobalVariables.primaryColor),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -162,16 +172,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      ListTile(
+                      RadioListTile<String>(
                         title: const Text(
                           'Economic',
-                          style: TextStyle(fontSize: 16, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(
+                              fontSize: 16, fontFamily: 'SF Pro Display'),
                         ),
                         subtitle: const Text(
                           '7 Days Arrival Guarantee',
-                          style: TextStyle(fontSize: 12, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(
+                              fontSize: 12, fontFamily: 'SF Pro Display'),
                         ),
-                        trailing: Text(
+                        value: 'Economic',
+                        groupValue: selectedShipping,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedShipping = value!;
+                          });
+                        },
+                        secondary: Text(
                           '\$${economicShippingCost.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
@@ -179,17 +198,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             fontFamily: 'SF Pro Display',
                           ),
                         ),
+                        activeColor: GlobalVariables.primaryColor,
                       ),
-                      ListTile(
+                      RadioListTile<String>(
                         title: const Text(
                           'Regular',
-                          style: TextStyle(fontSize: 16, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(
+                              fontSize: 16, fontFamily: 'SF Pro Display'),
                         ),
                         subtitle: const Text(
                           '4 Days Arrival Guarantee',
-                          style: TextStyle(fontSize: 12, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(
+                              fontSize: 12, fontFamily: 'SF Pro Display'),
                         ),
-                        trailing: Text(
+                        value: 'Regular',
+                        groupValue: selectedShipping,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedShipping = value!;
+                          });
+                        },
+                        secondary: Text(
                           '\$${regularShippingCost.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
@@ -197,17 +226,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             fontFamily: 'SF Pro Display',
                           ),
                         ),
+                        activeColor: GlobalVariables.primaryColor,
                       ),
-                      ListTile(
+                      RadioListTile<String>(
                         title: const Text(
                           'Express',
-                          style: TextStyle(fontSize: 16, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(
+                              fontSize: 16, fontFamily: 'SF Pro Display'),
                         ),
                         subtitle: const Text(
                           '2 Days Arrival Guarantee',
-                          style: TextStyle(fontSize: 12, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(
+                              fontSize: 12, fontFamily: 'SF Pro Display'),
                         ),
-                        trailing: Text(
+                        value: 'Express',
+                        groupValue: selectedShipping,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedShipping = value!;
+                          });
+                        },
+                        secondary: Text(
                           '\$${expressShippingCost.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
@@ -215,6 +254,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             fontFamily: 'SF Pro Display',
                           ),
                         ),
+                        activeColor: GlobalVariables.primaryColor,
                       ),
                     ],
                   ),
@@ -226,11 +266,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
-                        Icon(Icons.account_balance_wallet, color: GlobalVariables.primaryColor),
-                        const SizedBox(width: 8),
-                        const Text(
+                        Icon(Icons.account_balance_wallet,
+                            color: GlobalVariables.primaryColor),
+                        SizedBox(width: 8),
+                        Text(
                           'Payment Details',
                           style: TextStyle(
                             fontSize: 16,
@@ -275,7 +316,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          '\$${economicShippingCost.toStringAsFixed(2)}',
+                          '\$${shippingCost.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
@@ -364,7 +405,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => PaymentSuccessScreen(),
+                                  builder: (context) =>
+                                      const PaymentSuccessScreen(),
                                 ),
                               );
                             });
@@ -374,9 +416,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            padding: EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
-                          child: Text(
+                          child: const Text(
                             'Pay Now',
                             style: TextStyle(
                               fontSize: 20,
