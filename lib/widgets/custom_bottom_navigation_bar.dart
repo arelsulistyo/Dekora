@@ -1,21 +1,75 @@
+// custom_bottom_navigation_bar.dart
+import 'package:dekora/screens/home_screen.dart';
+import 'package:dekora/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
-  final Function(int) onItemTapped;
 
   const CustomBottomNavigationBar({
     super.key,
     required this.selectedIndex,
-    required this.onItemTapped,
   });
+
+  void _onItemTapped(BuildContext context, int index) {
+    String routeName;
+    switch (index) {
+      case 0:
+        routeName = '/home';
+        break;
+      case 1:
+        // Add navigation to the Shop screen if implemented
+        return;
+      case 2:
+        // Add navigation to the Search screen if implemented
+        return;
+      case 3:
+        routeName = '/profile';
+        break;
+      default:
+        return;
+    }
+
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            _getRoutePage(routeName),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = 0.0;
+          const end = 10.0;
+          const curve = Curves.easeInOut;
+
+          final tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final fadeAnimation = animation.drive(tween);
+
+          return FadeTransition(
+            opacity: fadeAnimation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
+  Widget _getRoutePage(String routeName) {
+    switch (routeName) {
+      case '/home':
+        return const HomeScreen();
+      case '/profile':
+        return const ProfileScreen();
+      default:
+        return const HomeScreen(); // Default to home if route not found
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: GlobalVariables.primaryColor, // Set the background color of the bar
+        color: GlobalVariables.primaryColor,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20.0),
           topRight: Radius.circular(20.0),
@@ -25,7 +79,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
             color: Colors.black.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: Offset(0, -3), // Shadow above the container
+            offset: const Offset(0, -3),
           ),
         ],
       ),
@@ -37,11 +91,11 @@ class CustomBottomNavigationBar extends StatelessWidget {
               topRight: Radius.circular(20.0),
             ),
             child: SizedBox(
-              height: 80, // Set the desired height of the bar
+              height: 80,
               child: BottomNavigationBar(
-                backgroundColor: GlobalVariables.primaryColor, // Solid background color
+                backgroundColor: GlobalVariables.primaryColor,
                 currentIndex: selectedIndex,
-                onTap: onItemTapped,
+                onTap: (index) => _onItemTapped(context, index),
                 items: [
                   _buildBottomNavigationBarItem(
                     icon: Icons.home,
@@ -64,8 +118,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
                     isSelected: selectedIndex == 3,
                   ),
                 ],
-                selectedItemColor: Colors.white, // Ensure the selected item color stands out on the primary color
-                unselectedItemColor: Colors.white.withOpacity(0.7), // Slightly transparent unselected items
+                selectedItemColor: Colors.white,
+                unselectedItemColor: Colors.white.withOpacity(0.7),
                 showUnselectedLabels: true,
                 type: BottomNavigationBarType.fixed,
               ),
@@ -77,7 +131,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
             child: Container(
               width: MediaQuery.of(context).size.width / 4,
               height: 4,
-              color: Colors.white, // Color of the horizontal bar indicator
+              color: Colors.white,
             ),
           ),
         ],
