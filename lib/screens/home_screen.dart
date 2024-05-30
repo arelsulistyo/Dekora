@@ -1,10 +1,9 @@
-// home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
 import 'package:dekora/models/flower_model.dart';
 import 'package:dekora/services/flower_service.dart';
 import 'package:dekora/widgets/custom_bottom_navigation_bar.dart';
-import 'flower_detail_screen.dart';
+import 'flower_detail_screen.dart'; // Import the new detail screen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -175,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(16.0),
                                   child: AspectRatio(
-                                    aspectRatio: 1,
+                                    aspectRatio: 1, // Adjust the aspect ratio as needed
                                     child: Image.asset(
                                       flower.imageUrl,
                                       fit: BoxFit.cover,

@@ -2,11 +2,145 @@
 import 'package:dekora/global_variables.dart';
 import 'package:flutter/material.dart';
 import 'package:dekora/models/flower_model.dart';
+import 'checkout_screen.dart'; // Import the new checkout screen
 
 class FlowerDetailScreen extends StatelessWidget {
   final Flower flower;
 
   const FlowerDetailScreen({super.key, required this.flower});
+
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        int quantity = 1;
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              color: GlobalVariables.secondaryColor,
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        flower.imageUrl,
+                        height: 50,
+                        width: 50,
+                      ),
+                      const SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '\$${flower.price.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: GlobalVariables.primaryColor,
+                            ),
+                          ),
+                          const Text(
+                            'Stock: 999',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Quantity',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove),
+                        onPressed: () {
+                          if (quantity > 1) {
+                            setState(() {
+                              quantity--;
+                            });
+                          }
+                        },
+                      ),
+                      Text(
+                        '$quantity',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            quantity++;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CheckoutScreen(
+                                flowerName: flower.name,
+                                price: flower.price,
+                                quantity: quantity,
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: GlobalVariables.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text(
+                          'Rent Now',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'SF Pro Display',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +242,6 @@ class FlowerDetailScreen extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
                               fontFamily: 'SF Pro Display',
-
                             ),
                           ),
                           Text(
@@ -118,7 +251,6 @@ class FlowerDetailScreen extends StatelessWidget {
                               color: GlobalVariables.primaryColor,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'SF Pro Display',
-
                             ),
                           ),
                         ],
@@ -132,18 +264,16 @@ class FlowerDetailScreen extends StatelessWidget {
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: GlobalVariables.primaryColor,
-                              fontFamily: 'SF Pro Display',
-
+                      fontFamily: 'SF Pro Display',
                     ),
                   ),
-                  const SizedBox(
-                      height: 20), // Adjusted gap between title and description
+                  const SizedBox(height: 20), // Adjusted gap between title and description
                   Text(
                     flower.description,
                     style: const TextStyle(
                       fontSize: 18,
                       color: GlobalVariables.primaryColor,
-                          fontFamily: 'SF Pro Display',
+                      fontFamily: 'SF Pro Display',
                       height: 1.2, // Reduced line height
                     ),
                   ),
@@ -180,20 +310,18 @@ class FlowerDetailScreen extends StatelessWidget {
                   child: SizedBox(
                     height: 50, // Ensures both buttons have the same height
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Handle rent now button press
-                      },
+                      onPressed: () => _showBottomSheet(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: GlobalVariables.primaryColor,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: const Text(
                         'Rent Now',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 16,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'SF Pro Display',
