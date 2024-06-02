@@ -4,7 +4,7 @@ import 'package:dekora/global_variables.dart';
 import 'package:dekora/models/flower_model.dart';
 import 'package:dekora/services/flower_service.dart';
 import 'package:dekora/widgets/custom_bottom_navigation_bar.dart';
-import 'flower_detail_screen.dart';
+import 'flower_detail_screen.dart'; // Import the new detail screen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,7 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController searchController = TextEditingController();
   bool isLoading = true;
   int _selectedIndex = 0;
-  int? _selectedFlowerId;
 
   @override
   void initState() {
@@ -58,28 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     setState(() {
       filteredFlowers = _flowers;
-    });
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  void _onFlowerTap(Flower flower) {
-    setState(() {
-      _selectedFlowerId = flower.id;
-    });
-    Future.delayed(const Duration(milliseconds: 200), () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => FlowerDetailScreen(flower: flower)),
-      ).then((_) {
-        setState(() {
-          _selectedFlowerId = null;
-        });
-      });
     });
   }
 
@@ -163,29 +140,30 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemBuilder: (context, index) {
                             final flower = filteredFlowers[index];
                             return GestureDetector(
-                              onTap: () => _onFlowerTap(flower),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FlowerDetailScreen(flower: flower),
+                                  ),
+                                );
+                              },
+                              child: Container(
                                 decoration: BoxDecoration(
-                                  color: _selectedFlowerId == flower.id
-                                      ? GlobalVariables.secondaryColor
-                                      : GlobalVariables.primaryColor,
+                                  color: GlobalVariables.primaryColor,
                                   borderRadius: BorderRadius.circular(16.0),
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(16.0),
-                                  child: AspectRatio(
-                                    aspectRatio: 1,
-                                    child: Image.asset(
-                                      flower.imageUrl,
-                                      fit: BoxFit.cover,
-                                    ),
+                                  child: Image.asset(
+                                    flower.imageUrl,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
                               ),
                             );
                           },
-                        ),  
+                        ),
                       ),
               ],
             ),
@@ -194,7 +172,6 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: Alignment.bottomCenter,
             child: CustomBottomNavigationBar(
               selectedIndex: _selectedIndex,
-              onItemTapped: _onItemTapped,
             ),
           ),
         ],
