@@ -115,6 +115,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final email = _emailController.text;
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
+    final displayName = _nameController.text;
 
     bool isEmailValid = _validateEmail(email);
     bool isPasswordValid = _validatePassword(password);
@@ -131,6 +132,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
           email: email,
           password: password,
         );
+
+        // Update display name
+        await userCredential.user!.updateDisplayName(displayName);
+
         if (userCredential.user != null) {
           log("User Created Successfully");
           Navigator.pushReplacement(
