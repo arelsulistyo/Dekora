@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:dekora/auth/auth_service.dart';
 import 'package:dekora/screens/login_screen.dart'; // Import the LoginScreen
 import 'package:dekora/global_variables.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _SignUpScreenState createState() => _SignUpScreenState();
 }
 
