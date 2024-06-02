@@ -1,5 +1,12 @@
-import 'package:dekora/global_variables.dart';
+import 'dart:developer';
+
+import 'package:dekora/auth/auth_service.dart';
+import 'package:dekora/screens/sign_up_screen.dart';
+import 'package:dekora/screens/home_screen.dart';
+import 'package:dekora/screens/forget_password_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dekora/global_variables.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,7 +16,73 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _auth = AuthService();
+
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  String? _error;
   bool _rememberMe = false;
+  bool _passwordVisible = false;
+  bool _isLoading = false; // Track the loading state
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _login() async {
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    setState(() {
+      _error = null; // Clear previous errors
+      _isLoading = true; // Start loading
+    });
+
+    try {
+      final user = await _auth.loginUserWithEmailAndPassword(email, password);
+      if (user != null) {
+        log("User Logged In");
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        if (e.code == 'user-not-found') {
+          _error = 'No user found for that email.';
+        } else if (e.code == 'wrong-password') {
+          _error = 'Wrong password provided for that user.';
+        } else {
+          _error = 'Incorrect email or password. Please try again.';
+        }
+        _isLoading = false; // Stop loading on error
+      });
+      log("Login failed: ${e.message}");
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading after process finishes
+      });
+    }
+  }
+
+  void _goToSignup(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SignUpScreen()),
+    );
+  }
+
+  void _goToForgotPassword(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ForgetPasswordScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,34 +169,50 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const TextField(
+                    TextField(
+                      controller: _emailController,
                       decoration: InputDecoration(
-                        labelText: 'Username',
-                        labelStyle: TextStyle(
+                        labelText: 'Email',
+                        labelStyle: const TextStyle(
                           fontFamily: 'SF Pro Display',
                           color: GlobalVariables.primaryColor,
                         ),
-                        focusedBorder: UnderlineInputBorder(
+                        focusedBorder: const UnderlineInputBorder(
                           borderSide:
                               BorderSide(color: GlobalVariables.primaryColor),
                         ),
-                        border: UnderlineInputBorder(),
+                        border: const UnderlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const TextField(
-                      obscureText: true,
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: !_passwordVisible,
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        labelStyle: TextStyle(
+                        labelStyle: const TextStyle(
                           fontFamily: 'SF Pro Display',
                           color: GlobalVariables.primaryColor,
                         ),
-                        focusedBorder: UnderlineInputBorder(
+                        focusedBorder: const UnderlineInputBorder(
                           borderSide:
                               BorderSide(color: GlobalVariables.primaryColor),
                         ),
-                        border: UnderlineInputBorder(),
+                        border: const UnderlineInputBorder(),
+                        errorText: _error,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: GlobalVariables.primaryColor,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _passwordVisible = !_passwordVisible;
+                            });
+                          },
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -161,7 +250,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Spacer(),
                           TextButton(
                             onPressed: () {
-                              // Handle forgot password
+                              _goToForgotPassword(
+                                  context); // Navigate to ForgetPasswordScreen
                             },
                             child: const Text(
                               'Forgot Password?',
@@ -176,29 +266,58 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/home');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: GlobalVariables.primaryColor,
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16.0),
+                    if (_isLoading)
+                      const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            GlobalVariables.primaryColor),
+                      )
+                    else
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _login,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: GlobalVariables.primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
                           ),
-                        ),
-                        child: const Text(
-                          'Sign In',
-                          style: TextStyle(
-                            fontFamily: 'SF Pro Display',
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                          child: const Text(
+                            'Sign In',
+                            style: TextStyle(
+                              fontFamily: 'SF Pro Display',
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Don't have an account? ",
+                          style: TextStyle(
+                            fontFamily: 'SF Pro Display',
+                            color: GlobalVariables.primaryColor,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => _goToSignup(context),
+                          child: const Text(
+                            "Sign Up",
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontFamily: 'SF Pro Display',
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.red,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
