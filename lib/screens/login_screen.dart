@@ -7,6 +7,7 @@ import 'package:dekora/screens/forget_password_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dekora/global_variables.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,6 +26,40 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = false;
   bool _passwordVisible = false;
   bool _isLoading = false; // Track the loading state
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserEmailPassword();
+  }
+
+  void _loadUserEmailPassword() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('email');
+    final password = prefs.getString('password');
+    final rememberMe = prefs.getBool('rememberMe') ?? false;
+
+    if (email != null && password != null && rememberMe) {
+      setState(() {
+        _emailController.text = email;
+        _passwordController.text = password;
+        _rememberMe = rememberMe;
+      });
+    }
+  }
+
+  Future<void> _saveUserEmailPassword() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_rememberMe) {
+      await prefs.setString('email', _emailController.text);
+      await prefs.setString('password', _passwordController.text);
+      await prefs.setBool('rememberMe', _rememberMe);
+    } else {
+      await prefs.remove('email');
+      await prefs.remove('password');
+      await prefs.remove('rememberMe');
+    }
+  }
 
   @override
   void dispose() {
@@ -46,6 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final user = await _auth.loginUserWithEmailAndPassword(email, password);
       if (user != null) {
         log("User Logged In");
+        await _saveUserEmailPassword(); // Save email and password
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
