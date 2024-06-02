@@ -1,15 +1,16 @@
-// flower_detail_screen.dart
 import 'package:dekora/global_variables.dart';
 import 'package:flutter/material.dart';
 import 'package:dekora/models/flower_model.dart';
-import 'checkout_screen.dart'; // Import the new checkout screen
+import 'package:dekora/services/cart_service.dart';
+import 'checkout_screen.dart';
+import 'home_screen.dart'; // Import HomeScreen to navigate back
 
 class FlowerDetailScreen extends StatelessWidget {
   final Flower flower;
 
   const FlowerDetailScreen({super.key, required this.flower});
 
-  void _showBottomSheet(BuildContext context) {
+  void _showBottomSheet(BuildContext context, bool isRentNow) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -28,7 +29,7 @@ class FlowerDetailScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Image.asset(
+                      Image.network(
                         flower.imageUrl,
                         height: 50,
                         width: 50,
@@ -45,9 +46,9 @@ class FlowerDetailScreen extends StatelessWidget {
                               color: GlobalVariables.primaryColor,
                             ),
                           ),
-                          const Text(
-                            'Stock: 999',
-                            style: TextStyle(
+                          Text(
+                            'Stock: ${flower.stock}',
+                            style: const TextStyle(
                               fontSize: 16,
                               color: Colors.black,
                             ),
@@ -101,18 +102,39 @@ class FlowerDetailScreen extends StatelessWidget {
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CheckoutScreen(
-                                flowerName: flower.name,
-                                price: flower.price,
-                                quantity: quantity,
+                        onPressed: () async {
+                          if (isRentNow) {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CheckoutScreen(
+                                  flowerName: flower.name,
+                                  price: flower.price,
+                                  quantity: quantity,
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          } else {
+                            try {
+                              await CartService.addItemToCart(
+                                  flower.id, quantity);
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Item added to cart!'),
+                                ),
+                              );
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => HomeScreen(),
+                                ),
+                              );
+                            } catch (e) {
+                              print('Failed to add to cart: $e');
+                            }
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: GlobalVariables.primaryColor,
@@ -121,9 +143,9 @@ class FlowerDetailScreen extends StatelessWidget {
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                        child: const Text(
-                          'Rent Now',
-                          style: TextStyle(
+                        child: Text(
+                          isRentNow ? 'Rent Now' : 'Add to Cart',
+                          style: const TextStyle(
                             fontSize: 20,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -149,7 +171,8 @@ class FlowerDetailScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.keyboard_double_arrow_left, color: GlobalVariables.primaryColor),
+          icon: const Icon(Icons.keyboard_double_arrow_left,
+              color: GlobalVariables.primaryColor),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -183,7 +206,7 @@ class FlowerDetailScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           padding: const EdgeInsets.all(16.0),
-                          child: Image.asset(
+                          child: Image.network(
                             flower.imageUrl,
                             height: 300,
                             fit: BoxFit.cover,
@@ -267,7 +290,8 @@ class FlowerDetailScreen extends StatelessWidget {
                       fontFamily: 'SF Pro Display',
                     ),
                   ),
-                  const SizedBox(height: 20), // Adjusted gap between title and description
+                  const SizedBox(
+                      height: 20), // Adjusted gap between title and description
                   Text(
                     flower.description,
                     style: const TextStyle(
@@ -292,9 +316,7 @@ class FlowerDetailScreen extends StatelessWidget {
                   height: 50, // Ensures both buttons have the same height
                   width: 60, // Set a fixed width for the add to cart button
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Handle add to cart button press
-                    },
+                    onPressed: () => _showBottomSheet(context, false),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: GlobalVariables.primaryColor,
                       shape: RoundedRectangleBorder(
@@ -302,7 +324,8 @@ class FlowerDetailScreen extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Icon(Icons.add_shopping_cart, color: Colors.white),
+                    child: const Icon(Icons.add_shopping_cart,
+                        color: Colors.white),
                   ),
                 ),
                 const SizedBox(width: 16), // Space between buttons
@@ -310,7 +333,7 @@ class FlowerDetailScreen extends StatelessWidget {
                   child: SizedBox(
                     height: 50, // Ensures both buttons have the same height
                     child: ElevatedButton(
-                      onPressed: () => _showBottomSheet(context),
+                      onPressed: () => _showBottomSheet(context, true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: GlobalVariables.primaryColor,
                         shape: RoundedRectangleBorder(

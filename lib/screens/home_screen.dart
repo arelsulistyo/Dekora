@@ -1,10 +1,9 @@
-// home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
 import 'package:dekora/models/flower_model.dart';
 import 'package:dekora/services/flower_service.dart';
 import 'package:dekora/widgets/custom_bottom_navigation_bar.dart';
-import 'flower_detail_screen.dart'; // Import the new detail screen
+import 'flower_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,6 +59,21 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  void _onFlowerTap(Flower flower) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FlowerDetailScreen(flower: flower),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     searchController.dispose();
@@ -106,7 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   controller: searchController,
                   decoration: InputDecoration(
                     hintText: 'Search',
-                    prefixIcon: Icon(Icons.search, color: GlobalVariables.primaryColor),
+                    prefixIcon:
+                        Icon(Icons.search, color: GlobalVariables.primaryColor),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16.0),
                     ),
@@ -123,7 +138,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const Text(
                   'Happy Renting :)',
-                  style: TextStyle(fontSize: 20, color: GlobalVariables.primaryColor),
+                  style: TextStyle(
+                      fontSize: 20, color: GlobalVariables.primaryColor),
                 ),
                 const SizedBox(height: 20),
                 isLoading
@@ -131,7 +147,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     : Expanded(
                         child: GridView.builder(
                           padding: const EdgeInsets.only(bottom: 80),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             crossAxisSpacing: 16.0,
                             mainAxisSpacing: 16.0,
@@ -140,14 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemBuilder: (context, index) {
                             final flower = filteredFlowers[index];
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => FlowerDetailScreen(flower: flower),
-                                  ),
-                                );
-                              },
+                              onTap: () => _onFlowerTap(flower),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: GlobalVariables.primaryColor,
@@ -155,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(16.0),
-                                  child: Image.asset(
+                                  child: Image.network(
                                     flower.imageUrl,
                                     fit: BoxFit.cover,
                                   ),
