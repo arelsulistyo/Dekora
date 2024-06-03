@@ -1,6 +1,7 @@
 // custom_bottom_navigation_bar.dart
 import 'package:dekora/screens/home_screen.dart';
 import 'package:dekora/screens/profile_screen.dart';
+import 'package:dekora/screens/transaction_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
 
@@ -22,8 +23,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
         // Add navigation to the Shop screen if implemented
         return;
       case 2:
-        // Add navigation to the Search screen if implemented
-        return;
+        routeName = '/transaction'; // Add navigation to the Transaction screen
+        break;
       case 3:
         routeName = '/profile';
         break;
@@ -60,6 +61,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
         return const HomeScreen();
       case '/profile':
         return const ProfileScreen();
+      case '/transaction':
+        return const TransactionScreen(); // Return the TransactionScreen
       default:
         return const HomeScreen(); // Default to home if route not found
     }
@@ -109,7 +112,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
                   ),
                   _buildBottomNavigationBarItem(
                     icon: Icons.search,
-                    label: 'Search',
+                    label: 'Transaction',
                     isSelected: selectedIndex == 2,
                   ),
                   _buildBottomNavigationBarItem(
