@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
 import 'package:dekora/widgets/custom_bottom_navigation_bar.dart';
+import 'package:intl/intl.dart';
 
 class ShoppingCart extends StatefulWidget {
   const ShoppingCart({super.key});
@@ -12,7 +13,7 @@ class ShoppingCart extends StatefulWidget {
 class _ShoppingCartState extends State<ShoppingCart> {
   List<Map<String, dynamic>> cartItems = [
     {
-      "image": "https://via.placeholder.com/150",
+      "image": 'assets/images/login_bg.png',
       "name": "Tulip Nice",
       "description": "Indoor | Medium",
       "price": 69201,
@@ -20,7 +21,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
       "selected": true
     },
     {
-      "image": "https://via.placeholder.com/150",
+      "image": 'assets/images/login_bg.png',
       "name": "Tulip Neh",
       "description": "Indoor | Medium",
       "price": 69201,
@@ -28,8 +29,40 @@ class _ShoppingCartState extends State<ShoppingCart> {
       "selected": true
     },
     {
-      "image": "https://via.placeholder.com/150",
+      "image": 'assets/images/login_bg.png',
       "name": "Tulip Nier",
+      "description": "Indoor | Medium",
+      "price": 69201,
+      "quantity": 1,
+      "selected": true
+    },
+    {
+      "image": 'assets/images/login_bg.png',
+      "name": "Tulip Nice",
+      "description": "Indoor | Medium",
+      "price": 69201,
+      "quantity": 1,
+      "selected": true
+    },
+    {
+      "image": 'assets/images/login_bg.png',
+      "name": "Tulip Nice",
+      "description": "Indoor | Medium",
+      "price": 69201,
+      "quantity": 1,
+      "selected": true
+    },
+    {
+      "image": 'assets/images/login_bg.png',
+      "name": "Tulip Nice",
+      "description": "Indoor | Medium",
+      "price": 69201,
+      "quantity": 1,
+      "selected": true
+    },
+    {
+      "image": 'assets/images/login_bg.png',
+      "name": "Tulip Nice",
       "description": "Indoor | Medium",
       "price": 69201,
       "quantity": 1,
@@ -78,6 +111,11 @@ class _ShoppingCartState extends State<ShoppingCart> {
     return total;
   }
 
+  String _formatPrice(double price) {
+    final formatter = NumberFormat('#,###');
+    return formatter.format(price).replaceAll(',', '.');
+  }
+
   void _showDeleteConfirmationDialog() {
     showDialog(
       context: context,
@@ -88,17 +126,24 @@ class _ShoppingCartState extends State<ShoppingCart> {
             style: TextStyle(
               color: GlobalVariables.primaryColor,
               fontWeight: FontWeight.bold,
+              fontFamily: 'SF Pro Display',
             ),
           ),
           content: Text(
             'Are you sure you want to delete all items from the cart?',
-            style: TextStyle(color: GlobalVariables.primaryColor),
+            style: TextStyle(
+              color: GlobalVariables.primaryColor,
+              fontFamily: 'SF Pro Display',
+            ),
           ),
           actions: <Widget>[
             TextButton(
               child: Text(
                 'Cancel',
-                style: TextStyle(color: GlobalVariables.primaryColor),
+                style: TextStyle(
+                  color: GlobalVariables.primaryColor,
+                  fontFamily: 'SF Pro Display',
+                ),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -107,7 +152,10 @@ class _ShoppingCartState extends State<ShoppingCart> {
             TextButton(
               child: Text(
                 'Delete',
-                style: TextStyle(color: GlobalVariables.primaryColor),
+                style: TextStyle(
+                  color: GlobalVariables.primaryColor,
+                  fontFamily: 'SF Pro Display',
+                ),
               ),
               onPressed: () {
                 setState(() {
@@ -129,7 +177,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: const Text(
-          'Shopping Cart',
+          'Dekora',
           style: TextStyle(
             fontFamily: 'Laviossa',
             fontSize: 28,
@@ -188,7 +236,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(
+                          child: Image.asset(
                             item['image'],
                             fit: BoxFit.cover,
                             width: 50,
@@ -205,19 +253,22 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                 color: GlobalVariables.primaryColor,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
+                                fontFamily: 'SF Pro Display',
                               ),
                             ),
                             Text(
                               item['description'],
                               style: const TextStyle(
                                 color: Colors.black54,
+                                fontFamily: 'SF Pro Display',
                               ),
                             ),
                             Text(
-                              'Rp${item['price']}',
+                              'Rp${_formatPrice(item['price'].toDouble())}',
                               style: const TextStyle(
                                 color: GlobalVariables.primaryColor,
                                 fontWeight: FontWeight.bold,
+                                fontFamily: 'SF Pro Display',
                               ),
                             ),
                           ],
@@ -227,20 +278,45 @@ class _ShoppingCartState extends State<ShoppingCart> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: Icon(Icons.remove,
-                              color: GlobalVariables.primaryColor),
-                          onPressed: () => _decrementQuantity(index),
+                        GestureDetector(
+                          onTap: () => _decrementQuantity(index),
+                          child: Container(
+                            padding: EdgeInsets.all(2.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: GlobalVariables.primaryColor,
+                            ),
+                            child: const Icon(
+                              Icons.remove,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
                         ),
-                        Text(
-                          item['quantity'].toString(),
-                          style: const TextStyle(
-                              color: GlobalVariables.primaryColor),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            item['quantity'].toString(),
+                            style: const TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'SF Pro Display',
+                                fontWeight: FontWeight.bold),
+                          ),
                         ),
-                        IconButton(
-                          icon: Icon(Icons.add,
-                              color: GlobalVariables.primaryColor),
-                          onPressed: () => _incrementQuantity(index),
+                        GestureDetector(
+                          onTap: () => _incrementQuantity(index),
+                          child: Container(
+                            padding: EdgeInsets.all(2.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: GlobalVariables.primaryColor,
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -270,7 +346,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
                         'Total Price:',
@@ -278,14 +354,17 @@ class _ShoppingCartState extends State<ShoppingCart> {
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: GlobalVariables.primaryColor,
+                          fontFamily: 'SF Pro Display',
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
-                        'Rp${_calculateTotalPrice().toStringAsFixed(3)}',
+                        'Rp${_formatPrice(_calculateTotalPrice())}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: GlobalVariables.primaryColor,
+                          color: Colors.black,
+                          fontFamily: 'SF Pro Display',
                         ),
                       ),
                     ],
@@ -310,17 +389,26 @@ class _ShoppingCartState extends State<ShoppingCart> {
                         },
                         child: Text(
                           _isCartUpdated ? 'Update Cart' : 'Checkout',
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(
+                            color: _isCartUpdated
+                                ? GlobalVariables.primaryColor
+                                : Colors.white,
+                            fontFamily: 'SF Pro Display',
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isCartUpdated
-                              ? Colors.pink
+                              ? Colors.white
                               : GlobalVariables.primaryColor,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 32.0, vertical: 16.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
+                          side: _isCartUpdated
+                              ? BorderSide(
+                                  color: GlobalVariables.primaryColor, width: 2)
+                              : null,
                         ),
                       ),
                     ],
@@ -329,9 +417,9 @@ class _ShoppingCartState extends State<ShoppingCart> {
               ),
             ),
           ),
-          SizedBox(
+          const SizedBox(
               height:
-                  70), // Add this SizedBox to add space above the bottom navigation bar
+                  10), // Add this SizedBox to add space above the bottom navigation bar
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
