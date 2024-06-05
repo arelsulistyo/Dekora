@@ -1,6 +1,7 @@
 // custom_bottom_navigation_bar.dart
 import 'package:dekora/screens/home_screen.dart';
 import 'package:dekora/screens/profile_screen.dart';
+import 'package:dekora/screens/shopping_cart.dart';
 import 'package:dekora/screens/transaction_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
@@ -20,8 +21,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
         routeName = '/home';
         break;
       case 1:
-        // Add navigation to the Shop screen if implemented
-        return;
+        routeName = '/shopping-cart';
+        break;
       case 2:
         routeName = '/transaction'; // Add navigation to the Transaction screen
         break;
@@ -38,7 +39,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
             _getRoutePage(routeName),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = 0.0;
-          const end = 10.0;
+          const end = 1.0;
           const curve = Curves.easeInOut;
 
           final tween =
@@ -61,6 +62,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
         return const HomeScreen();
       case '/profile':
         return const ProfileScreen();
+      case '/shopping-cart':
+        return const ShoppingCart();
       case '/transaction':
         return const TransactionScreen(); // Return the TransactionScreen
       default:
@@ -106,8 +109,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
                     isSelected: selectedIndex == 0,
                   ),
                   _buildBottomNavigationBarItem(
-                    icon: Icons.shop,
-                    label: 'Shop',
+                    icon: Icons.shopping_cart,
+                    label: 'Cart',
                     isSelected: selectedIndex == 1,
                   ),
                   _buildBottomNavigationBarItem(
