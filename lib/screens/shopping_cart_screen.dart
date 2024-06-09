@@ -88,7 +88,6 @@ class _ShoppingCartState extends State<ShoppingCart> {
       for (var item in cartItems) {
         await CartService.updateCartItem(item.flowerId, item.quantity);
       }
-      await fetchCartItems();
       setState(() {
         _isCartUpdated = false;
         _isUpdating = false;
@@ -100,7 +99,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to update cart items'),
+          content: const Text('Failed to update cart items'),
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         ),
@@ -113,7 +112,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
+          title: const Text(
             'Delete Cart',
             style: TextStyle(
               color: GlobalVariables.primaryColor,
@@ -121,7 +120,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
               fontFamily: 'SF Pro Display',
             ),
           ),
-          content: Text(
+          content: const Text(
             'Are you sure you want to delete all items from the cart?',
             style: TextStyle(
               color: GlobalVariables.primaryColor,
@@ -130,7 +129,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text(
+              child: const Text(
                 'Cancel',
                 style: TextStyle(
                   color: GlobalVariables.primaryColor,
@@ -142,7 +141,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
               },
             ),
             TextButton(
-              child: Text(
+              child: const Text(
                 'Delete',
                 style: TextStyle(
                   color: GlobalVariables.primaryColor,
@@ -157,7 +156,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
                 try {
                   for (var item in cartItems) {
                     item.quantity = 0;
-                    await CartService.updateCartItem(item.flowerId, item.quantity);
+                    await CartService.updateCartItem(
+                        item.flowerId, item.quantity);
                   }
                   await fetchCartItems();
                   setState(() {
@@ -171,9 +171,10 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   });
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to update cart items'),
+                      content: const Text('Failed to update cart items'),
                       behavior: SnackBarBehavior.floating,
-                      margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                      margin: EdgeInsets.only(
+                          top: MediaQuery.of(context).padding.top),
                     ),
                   );
                 }
@@ -186,7 +187,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
   }
 
   void _goToCheckout() {
-    List<CartItem> selectedItems = cartItems.where((item) => item.selected).toList();
+    List<CartItem> selectedItems =
+        cartItems.where((item) => item.selected).toList();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -231,7 +233,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     border: Border(
                       top: BorderSide(
                         color: GlobalVariables.primaryColor,
@@ -250,20 +252,22 @@ class _ShoppingCartState extends State<ShoppingCart> {
                             children: [
                               ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                                  Navigator.pushNamedAndRemoveUntil(
+                                      context, '/home', (route) => false);
                                 },
-                                child: Text(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: GlobalVariables.primaryColor,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 32.0, vertical: 16.0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                child: const Text(
                                   'Browse',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'SF Pro Display',
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: GlobalVariables.primaryColor,
-                                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
                                   ),
                                 ),
                               ),
@@ -277,7 +281,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
                             itemBuilder: (context, index) {
                               final item = cartItems[index];
                               return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0),
                                 child: ListTile(
                                   contentPadding: const EdgeInsets.all(8.0),
                                   leading: Checkbox(
@@ -290,7 +295,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                   title: Row(
                                     children: [
                                       ClipRRect(
-                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
                                         child: Image.network(
                                           item.imageUrl,
                                           fit: BoxFit.cover,
@@ -300,12 +306,14 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                       ),
                                       const SizedBox(width: 16),
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             item.name,
                                             style: const TextStyle(
-                                              color: GlobalVariables.primaryColor,
+                                              color:
+                                                  GlobalVariables.primaryColor,
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
                                               fontFamily: 'SF Pro Display',
@@ -321,7 +329,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                           Text(
                                             'Rp${_formatPrice(item.price.toDouble())}',
                                             style: const TextStyle(
-                                              color: GlobalVariables.primaryColor,
+                                              color:
+                                                  GlobalVariables.primaryColor,
                                               fontWeight: FontWeight.bold,
                                               fontFamily: 'SF Pro Display',
                                             ),
@@ -336,8 +345,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                       GestureDetector(
                                         onTap: () => _decrementQuantity(index),
                                         child: Container(
-                                          padding: EdgeInsets.all(2.0),
-                                          decoration: BoxDecoration(
+                                          padding: const EdgeInsets.all(2.0),
+                                          decoration: const BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: GlobalVariables.primaryColor,
                                           ),
@@ -349,7 +358,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0),
                                         child: Text(
                                           item.quantity.toString(),
                                           style: const TextStyle(
@@ -361,8 +371,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                       GestureDetector(
                                         onTap: () => _incrementQuantity(index),
                                         child: Container(
-                                          padding: EdgeInsets.all(2.0),
-                                          decoration: BoxDecoration(
+                                          padding: const EdgeInsets.all(2.0),
+                                          decoration: const BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: GlobalVariables.primaryColor,
                                           ),
@@ -383,7 +393,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
                         color: GlobalVariables.primaryColor,
@@ -430,7 +440,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             IconButton(
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.delete,
                                 color: GlobalVariables.primaryColor,
                               ),
@@ -438,21 +448,32 @@ class _ShoppingCartState extends State<ShoppingCart> {
                             ),
                             const SizedBox(width: 8),
                             ElevatedButton(
-                              onPressed: _isCartUpdated ? _updateCartItems : _goToCheckout,
-                              child: Text(
-                                _isCartUpdated ? 'Update Cart' : 'Checkout',
-                                style: TextStyle(
-                                  color: _isCartUpdated ? GlobalVariables.primaryColor : Colors.white,
-                                  fontFamily: 'SF Pro Display',
-                                ),
-                              ),
+                              onPressed: _isCartUpdated
+                                  ? _updateCartItems
+                                  : _goToCheckout,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: _isCartUpdated ? Colors.white : GlobalVariables.primaryColor,
-                                padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+                                backgroundColor: _isCartUpdated
+                                    ? Colors.white
+                                    : GlobalVariables.primaryColor,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 32.0, vertical: 16.0),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
-                                side: _isCartUpdated ? BorderSide(color: GlobalVariables.primaryColor, width: 2) : null,
+                                side: _isCartUpdated
+                                    ? const BorderSide(
+                                        color: GlobalVariables.primaryColor,
+                                        width: 2)
+                                    : null,
+                              ),
+                              child: Text(
+                                _isCartUpdated ? 'Update Cart' : 'Checkout',
+                                style: TextStyle(
+                                  color: _isCartUpdated
+                                      ? GlobalVariables.primaryColor
+                                      : Colors.white,
+                                  fontFamily: 'SF Pro Display',
+                                ),
                               ),
                             ),
                           ],
