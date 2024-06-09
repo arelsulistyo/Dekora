@@ -12,9 +12,7 @@ class CartService {
       throw Exception('User not authenticated');
     }
 
-    final idToken = await user.getIdToken(true); // Ensure token refresh
-    print('hi');
-    print(idToken);
+    final idToken = await user.getIdToken(true);
 
     final response = await http.post(
       Uri.parse(_baseUrl),
@@ -34,6 +32,31 @@ class CartService {
     }
   }
 
+  static Future<void> updateCartItem(String flowerId, int quantity) async {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final idToken = await user.getIdToken(true);
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl/${user.uid}/update'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $idToken',
+      },
+      body: json.encode({
+        'flowerId': flowerId,
+        'quantity': quantity,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update cart item');
+    }
+  }
+
   static Future<List<CartItem>> fetchCartItems() async {
     final User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -44,8 +67,7 @@ class CartService {
       Uri.parse('$_baseUrl/${user.uid}'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization':
-            'Bearer ${await user.getIdToken(true)}', // Ensure token refresh
+        'Authorization': 'Bearer ${await user.getIdToken(true)}',
       },
     );
 
