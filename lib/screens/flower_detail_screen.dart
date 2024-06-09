@@ -1,7 +1,8 @@
-import 'package:dekora/global_variables.dart';
 import 'package:flutter/material.dart';
+import 'package:dekora/global_variables.dart';
 import 'package:dekora/models/flower_model.dart';
 import 'package:dekora/services/cart_service.dart';
+import 'package:dekora/models/cart_item_model.dart';
 import 'checkout_screen.dart';
 import 'home_screen.dart'; // Import HomeScreen to navigate back
 
@@ -39,7 +40,7 @@ class FlowerDetailScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '\$${flower.price.toStringAsFixed(2)}',
+                            'Rp${flower.price.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -105,13 +106,21 @@ class FlowerDetailScreen extends StatelessWidget {
                         onPressed: () async {
                           if (isRentNow) {
                             Navigator.pop(context);
+                            CartItem cartItem = CartItem(
+                              id: flower.id,
+                              flowerId: flower.id, // Add flowerId here
+                              name: flower.name,
+                              imageUrl: flower.imageUrl,
+                              description: flower.description,
+                              price: flower.price,
+                              quantity: quantity,
+                              selected: true,
+                            );
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => CheckoutScreen(
-                                  flowerName: flower.name,
-                                  price: flower.price,
-                                  quantity: quantity,
+                                  selectedItems: [cartItem],
                                 ),
                               ),
                             );
@@ -230,7 +239,7 @@ class FlowerDetailScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '\$${flower.price.toStringAsFixed(2)}',
+                            'Rp${flower.price.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 20,
                               color: GlobalVariables.primaryColor,

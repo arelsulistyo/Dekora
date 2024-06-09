@@ -1,18 +1,14 @@
-// checkout_screen.dart
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
-import 'payment_success_screen.dart'; // Import the new payment success screen
+import 'package:dekora/models/cart_item_model.dart';
+import 'payment_success_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  final String flowerName;
-  final double price;
-  final int quantity;
+  final List<CartItem> selectedItems;
 
   const CheckoutScreen({
     super.key,
-    required this.flowerName,
-    required this.price,
-    required this.quantity,
+    required this.selectedItems,
   });
 
   @override
@@ -23,6 +19,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool productProtection = false;
   bool isLoading = false;
   String selectedShipping = 'Economic';
+
+  double _calculateTotalPrice() {
+    double total = 0;
+    for (var item in widget.selectedItems) {
+      total += item.price * item.quantity;
+    }
+    return total;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +43,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       shippingCost = expressShippingCost;
     }
 
-    double totalPayment =
-        widget.price * widget.quantity + servicesFee + shippingCost;
+    double totalPayment = _calculateTotalPrice() + servicesFee + shippingCost;
     if (productProtection) {
-      totalPayment += productProtectionCost * widget.quantity;
+      totalPayment += productProtectionCost * widget.selectedItems.length;
     }
 
     return Scaffold(
@@ -76,52 +79,52 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Image.asset(
-                            'assets/images/flower1.png', // Update this to the correct asset path
-                            height: 50,
-                            width: 50,
-                          ),
-                          const SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      ...widget.selectedItems.map((item) => Row(
                             children: [
-                              Text(
-                                widget.flowerName,
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: GlobalVariables.primaryColor,
-                                  fontFamily: 'SF Pro Display',
-                                ),
+                              Image.network(
+                                item.imageUrl,
+                                height: 50,
+                                width: 50,
                               ),
-                              Row(
+                              const SizedBox(width: 16),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '\$${widget.price.toStringAsFixed(2)}',
+                                    item.name,
                                     style: const TextStyle(
-                                      fontSize: 20,
-                                      color: GlobalVariables.primaryColor,
+                                      fontSize: 28,
                                       fontWeight: FontWeight.bold,
+                                      color: GlobalVariables.primaryColor,
                                       fontFamily: 'SF Pro Display',
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'x${widget.quantity}',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                      fontFamily: 'SF Pro Display',
-                                    ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        '\$${item.price.toStringAsFixed(2)}',
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          color: GlobalVariables.primaryColor,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'SF Pro Display',
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'x${item.quantity}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                          fontFamily: 'SF Pro Display',
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
                             ],
-                          ),
-                        ],
-                      ),
+                          )),
                       const SizedBox(height: 20),
                       GestureDetector(
                         onTap: () {
@@ -150,7 +153,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ),
                             const Spacer(),
                             Text(
-                              '\$${productProtectionCost.toStringAsFixed(2)} x${widget.quantity}',
+                              '\$${productProtectionCost.toStringAsFixed(2)} x${widget.selectedItems.length}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 color: GlobalVariables.primaryColor,
@@ -295,7 +298,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          '\$${(widget.price * widget.quantity).toStringAsFixed(2)}',
+                          'Rp${_calculateTotalPrice().toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
@@ -338,7 +341,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ),
                           const Spacer(),
                           Text(
-                            '\$${(productProtectionCost * widget.quantity).toStringAsFixed(2)}',
+                            '\$${(productProtectionCost * widget.selectedItems.length).toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 16,
                               color: GlobalVariables.primaryColor,
@@ -382,7 +385,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          '\$${totalPayment.toStringAsFixed(2)}',
+                          'Rp${totalPayment.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

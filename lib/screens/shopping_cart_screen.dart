@@ -4,6 +4,7 @@ import 'package:dekora/services/cart_service.dart';
 import 'package:dekora/widgets/custom_bottom_navigation_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:dekora/models/cart_item_model.dart';
+import 'checkout_screen.dart';
 
 class ShoppingCart extends StatefulWidget {
   const ShoppingCart({super.key});
@@ -16,7 +17,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
   List<CartItem> cartItems = [];
   bool isLoading = true;
   bool _isCartUpdated = false;
-  bool _isUpdating = false; // Track the updating state
+  bool _isUpdating = false;
   int _selectedIndex = 1;
 
   @override
@@ -80,22 +81,22 @@ class _ShoppingCartState extends State<ShoppingCart> {
 
   void _updateCartItems() async {
     setState(() {
-      _isUpdating = true; // Start showing the loading overlay
+      _isUpdating = true;
     });
 
     try {
       for (var item in cartItems) {
         await CartService.updateCartItem(item.flowerId, item.quantity);
       }
-      await fetchCartItems(); // Fetch the updated cart items
+      await fetchCartItems();
       setState(() {
         _isCartUpdated = false;
-        _isUpdating = false; // Stop showing the loading overlay
+        _isUpdating = false;
       });
     } catch (e) {
       print('Failed to update cart items: $e');
       setState(() {
-        _isUpdating = false; // Stop showing the loading overlay
+        _isUpdating = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -155,10 +156,10 @@ class _ShoppingCartState extends State<ShoppingCart> {
                 });
                 try {
                   for (var item in cartItems) {
-                    item.quantity = 0; // Set the quantity of all items to 0
+                    item.quantity = 0;
                     await CartService.updateCartItem(item.flowerId, item.quantity);
                   }
-                  await fetchCartItems(); // Fetch the updated cart items
+                  await fetchCartItems();
                   setState(() {
                     _isCartUpdated = false;
                     _isUpdating = false;
@@ -184,8 +185,14 @@ class _ShoppingCartState extends State<ShoppingCart> {
     );
   }
 
-  void _goToHome() {
-    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+  void _goToCheckout() {
+    List<CartItem> selectedItems = cartItems.where((item) => item.selected).toList();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckoutScreen(selectedItems: selectedItems),
+      ),
+    );
   }
 
   @override
@@ -242,7 +249,9 @@ class _ShoppingCartState extends State<ShoppingCart> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               ElevatedButton(
-                                onPressed: _goToHome,
+                                onPressed: () {
+                                  Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                                },
                                 child: Text(
                                   'Browse',
                                   style: TextStyle(
@@ -252,8 +261,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: GlobalVariables.primaryColor,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 32.0, vertical: 16.0),
+                                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
@@ -283,7 +291,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                     children: [
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(8.0),
-                                        child: Image.asset(
+                                        child: Image.network(
                                           item.imageUrl,
                                           fit: BoxFit.cover,
                                           width: 50,
@@ -430,32 +438,21 @@ class _ShoppingCartState extends State<ShoppingCart> {
                             ),
                             const SizedBox(width: 8),
                             ElevatedButton(
-                              onPressed: () {
-                                _updateCartItems();
-                              },
+                              onPressed: _isCartUpdated ? _updateCartItems : _goToCheckout,
                               child: Text(
                                 _isCartUpdated ? 'Update Cart' : 'Checkout',
                                 style: TextStyle(
-                                  color: _isCartUpdated
-                                      ? GlobalVariables.primaryColor
-                                      : Colors.white,
+                                  color: _isCartUpdated ? GlobalVariables.primaryColor : Colors.white,
                                   fontFamily: 'SF Pro Display',
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: _isCartUpdated
-                                    ? Colors.white
-                                    : GlobalVariables.primaryColor,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 32.0, vertical: 16.0),
+                                backgroundColor: _isCartUpdated ? Colors.white : GlobalVariables.primaryColor,
+                                padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
-                                side: _isCartUpdated
-                                    ? BorderSide(
-                                        color: GlobalVariables.primaryColor,
-                                        width: 2)
-                                    : null,
+                                side: _isCartUpdated ? BorderSide(color: GlobalVariables.primaryColor, width: 2) : null,
                               ),
                             ),
                           ],
@@ -464,9 +461,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                     ),
                   ),
                 ),
-              const SizedBox(
-                  height:
-                      10), // Add this SizedBox to add space above the bottom navigation bar
+              const SizedBox(height: 10),
             ],
           ),
           if (_isUpdating)
