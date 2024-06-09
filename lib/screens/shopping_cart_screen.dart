@@ -87,6 +87,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
       for (var item in cartItems) {
         await CartService.updateCartItem(item.flowerId, item.quantity);
       }
+      await fetchCartItems(); // Fetch the updated cart items
       setState(() {
         _isCartUpdated = false;
         _isUpdating = false; // Stop showing the loading overlay
@@ -147,18 +148,44 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   fontFamily: 'SF Pro Display',
                 ),
               ),
-              onPressed: () {
-                setState(() {
-                  cartItems.clear();
-                  _isCartUpdated = true;
-                });
+              onPressed: () async {
                 Navigator.of(context).pop();
+                setState(() {
+                  _isUpdating = true;
+                });
+                try {
+                  for (var item in cartItems) {
+                    item.quantity = 0; // Set the quantity of all items to 0
+                    await CartService.updateCartItem(item.flowerId, item.quantity);
+                  }
+                  await fetchCartItems(); // Fetch the updated cart items
+                  setState(() {
+                    _isCartUpdated = false;
+                    _isUpdating = false;
+                  });
+                } catch (e) {
+                  print('Failed to update cart items: $e');
+                  setState(() {
+                    _isUpdating = false;
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to update cart items'),
+                      behavior: SnackBarBehavior.floating,
+                      margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                    ),
+                  );
+                }
               },
             ),
           ],
         );
       },
     );
+  }
+
+  void _goToHome() {
+    Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
   }
 
   @override
@@ -209,119 +236,142 @@ class _ShoppingCartState extends State<ShoppingCart> {
               ),
               isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        itemCount: cartItems.length,
-                        itemBuilder: (context, index) {
-                          final item = cartItems[index];
-                          return Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(8.0),
-                              leading: Checkbox(
-                                value: item.selected,
-                                onChanged: (bool? value) {
-                                  _toggleSelection(index, value);
-                                },
-                                activeColor: GlobalVariables.primaryColor,
-                              ),
-                              title: Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.asset(
-                                      item.imageUrl,
-                                      fit: BoxFit.cover,
-                                      width: 50,
-                                      height: 50,
-                                    ),
+                  : cartItems.isEmpty
+                      ? Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: _goToHome,
+                                child: Text(
+                                  'Browse',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'SF Pro Display',
                                   ),
-                                  const SizedBox(width: 16),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: GlobalVariables.primaryColor,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 32.0, vertical: 16.0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Expanded(
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            itemCount: cartItems.length,
+                            itemBuilder: (context, index) {
+                              final item = cartItems[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.all(8.0),
+                                  leading: Checkbox(
+                                    value: item.selected,
+                                    onChanged: (bool? value) {
+                                      _toggleSelection(index, value);
+                                    },
+                                    activeColor: GlobalVariables.primaryColor,
+                                  ),
+                                  title: Row(
                                     children: [
-                                      Text(
-                                        item.name,
-                                        style: const TextStyle(
-                                          color: GlobalVariables.primaryColor,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'SF Pro Display',
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        child: Image.asset(
+                                          item.imageUrl,
+                                          fit: BoxFit.cover,
+                                          width: 50,
+                                          height: 50,
                                         ),
                                       ),
-                                      Text(
-                                        item.description,
-                                        style: const TextStyle(
-                                          color: Colors.black54,
-                                          fontFamily: 'SF Pro Display',
+                                      const SizedBox(width: 16),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.name,
+                                            style: const TextStyle(
+                                              color: GlobalVariables.primaryColor,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'SF Pro Display',
+                                            ),
+                                          ),
+                                          Text(
+                                            item.description,
+                                            style: const TextStyle(
+                                              color: Colors.black54,
+                                              fontFamily: 'SF Pro Display',
+                                            ),
+                                          ),
+                                          Text(
+                                            'Rp${_formatPrice(item.price.toDouble())}',
+                                            style: const TextStyle(
+                                              color: GlobalVariables.primaryColor,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'SF Pro Display',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => _decrementQuantity(index),
+                                        child: Container(
+                                          padding: EdgeInsets.all(2.0),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: GlobalVariables.primaryColor,
+                                          ),
+                                          child: const Icon(
+                                            Icons.remove,
+                                            color: Colors.white,
+                                            size: 16,
+                                          ),
                                         ),
                                       ),
-                                      Text(
-                                        'Rp${_formatPrice(item.price.toDouble())}',
-                                        style: const TextStyle(
-                                          color: GlobalVariables.primaryColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'SF Pro Display',
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                        child: Text(
+                                          item.quantity.toString(),
+                                          style: const TextStyle(
+                                              color: Colors.black,
+                                              fontFamily: 'SF Pro Display',
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () => _incrementQuantity(index),
+                                        child: Container(
+                                          padding: EdgeInsets.all(2.0),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: GlobalVariables.primaryColor,
+                                          ),
+                                          child: const Icon(
+                                            Icons.add,
+                                            color: Colors.white,
+                                            size: 16,
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () => _decrementQuantity(index),
-                                    child: Container(
-                                      padding: EdgeInsets.all(2.0),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: GlobalVariables.primaryColor,
-                                      ),
-                                      child: const Icon(
-                                        Icons.remove,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0),
-                                    child: Text(
-                                      item.quantity.toString(),
-                                      style: const TextStyle(
-                                          color: Colors.black,
-                                          fontFamily: 'SF Pro Display',
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () => _incrementQuantity(index),
-                                    child: Container(
-                                      padding: EdgeInsets.all(2.0),
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: GlobalVariables.primaryColor,
-                                      ),
-                                      child: const Icon(
-                                        Icons.add,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(
@@ -335,84 +385,85 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  color: Colors.white,
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Total Price:',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: GlobalVariables.primaryColor,
-                              fontFamily: 'SF Pro Display',
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Rp${_formatPrice(_calculateTotalPrice())}',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                              fontFamily: 'SF Pro Display',
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              Icons.delete,
-                              color: GlobalVariables.primaryColor,
-                            ),
-                            onPressed: _showDeleteConfirmationDialog,
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              _updateCartItems();
-                            },
-                            child: Text(
-                              _isCartUpdated ? 'Update Cart' : 'Checkout',
+              if (cartItems.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    color: Colors.white,
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Total Price:',
                               style: TextStyle(
-                                color: _isCartUpdated
-                                    ? GlobalVariables.primaryColor
-                                    : Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: GlobalVariables.primaryColor,
                                 fontFamily: 'SF Pro Display',
                               ),
                             ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: _isCartUpdated
-                                  ? Colors.white
-                                  : GlobalVariables.primaryColor,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 32.0, vertical: 16.0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Rp${_formatPrice(_calculateTotalPrice())}',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                fontFamily: 'SF Pro Display',
                               ),
-                              side: _isCartUpdated
-                                  ? BorderSide(
-                                      color: GlobalVariables.primaryColor,
-                                      width: 2)
-                                  : null,
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                color: GlobalVariables.primaryColor,
+                              ),
+                              onPressed: _showDeleteConfirmationDialog,
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: () {
+                                _updateCartItems();
+                              },
+                              child: Text(
+                                _isCartUpdated ? 'Update Cart' : 'Checkout',
+                                style: TextStyle(
+                                  color: _isCartUpdated
+                                      ? GlobalVariables.primaryColor
+                                      : Colors.white,
+                                  fontFamily: 'SF Pro Display',
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _isCartUpdated
+                                    ? Colors.white
+                                    : GlobalVariables.primaryColor,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 32.0, vertical: 16.0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                side: _isCartUpdated
+                                    ? BorderSide(
+                                        color: GlobalVariables.primaryColor,
+                                        width: 2)
+                                    : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
               const SizedBox(
                   height:
                       10), // Add this SizedBox to add space above the bottom navigation bar
