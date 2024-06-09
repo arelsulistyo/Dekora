@@ -199,6 +199,9 @@ class _ShoppingCartState extends State<ShoppingCart> {
 
   @override
   Widget build(BuildContext context) {
+    bool hasSelectedItems =
+        cartItems.any((item) => item.selected); // Check if any item is selected
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -450,7 +453,9 @@ class _ShoppingCartState extends State<ShoppingCart> {
                             ElevatedButton(
                               onPressed: _isCartUpdated
                                   ? _updateCartItems
-                                  : _goToCheckout,
+                                  : hasSelectedItems
+                                      ? _goToCheckout
+                                      : null,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: _isCartUpdated
                                     ? Colors.white
