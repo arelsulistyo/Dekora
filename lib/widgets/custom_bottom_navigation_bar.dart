@@ -1,7 +1,7 @@
 // custom_bottom_navigation_bar.dart
 import 'package:dekora/screens/home_screen.dart';
 import 'package:dekora/screens/profile_screen.dart';
-import 'package:dekora/screens/shopping_cart.dart';
+import 'package:dekora/screens/shopping_cart_screen.dart';
 import 'package:dekora/screens/transaction_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
