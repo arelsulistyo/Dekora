@@ -1,7 +1,6 @@
-// transaction_screen.dart
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
-import 'package:dekora/services/transaction_service.dart';
+import 'package:dekora/screens/order_details.dart'; // Add this import
 import 'package:dekora/models/transaction_model.dart';
 import 'package:dekora/widgets/custom_bottom_navigation_bar.dart';
 
@@ -23,20 +22,86 @@ class _TransactionScreenState extends State<TransactionScreen> {
     fetchTransactions();
   }
 
-  Future<void> fetchTransactions() async {
-    try {
-      final fetchedTransactions =
-          await TransactionService.getUserTransactions();
-      setState(() {
-        transactions = fetchedTransactions.cast<Transaction>();
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      print('Failed to fetch transactions: $e');
-    }
+  void fetchTransactions() {
+    // Dummy data for transactions
+    setState(() {
+      transactions = [
+        Transaction(
+          id: '1',
+          userId: 'user1',
+          items: [
+            Item(
+              flowerId: 'flower1',
+              name: 'Tulip Nigga 8818',
+              imageUrl: 'https://via.placeholder.com/150',
+              description: 'Beautiful tulips',
+              price: 20.0,
+              quantity: 25,
+            ),
+            Item(
+              flowerId: 'flower2',
+              name: 'Rose Paradise',
+              imageUrl: 'https://via.placeholder.com/150',
+              description: 'Beautiful roses',
+              price: 30.0,
+              quantity: 15,
+            ),
+            Item(
+              flowerId: 'flower3',
+              name: 'Sunflower Delight',
+              imageUrl: 'https://via.placeholder.com/150',
+              description: 'Bright sunflowers',
+              price: 25.0,
+              quantity: 10,
+            ),
+            Item(
+              flowerId: 'flower4',
+              name: 'Lily Elegance',
+              imageUrl: 'https://via.placeholder.com/150',
+              description: 'Elegant lilies',
+              price: 28.0,
+              quantity: 20,
+            ),
+            Item(
+              flowerId: 'flower5',
+              name: 'Daisy Dream',
+              imageUrl: 'https://via.placeholder.com/150',
+              description: 'Dreamy daisies',
+              price: 15.0,
+              quantity: 30,
+            ),
+          ],
+          totalAmount: 88888888.0,
+          shippingAddress: '3517 W. Gray St. Utica, Pennsylvania 57867',
+          paymentMethod: 'Credit Card',
+          shippingMethod: 'Courier',
+          productProtection: true,
+          date: DateTime.now(),
+        ),
+        Transaction(
+          id: '2',
+          userId: 'user2',
+          items: [
+            Item(
+              flowerId: 'flower6',
+              name: 'Orchid Oasis',
+              imageUrl: 'https://via.placeholder.com/150',
+              description: 'Orchid flowers',
+              price: 40.0,
+              quantity: 12,
+            ),
+          ],
+          totalAmount: 48000000.0,
+          shippingAddress: '123 Main St, New York, NY 10001',
+          paymentMethod: 'PayPal',
+          shippingMethod: 'Courier',
+          productProtection: false,
+          date: DateTime.now().subtract(Duration(days: 1)),
+        ),
+        // Add more dummy transactions as needed
+      ];
+      isLoading = false;
+    });
   }
 
   void _onItemTapped(int index) {
@@ -199,14 +264,22 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                   ),
                                   ElevatedButton(
                                     onPressed: () {
-                                      // Handle buy again action
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              OrderDetailsScreen(
+                                            transaction: transaction,
+                                          ),
+                                        ),
+                                      );
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:
                                           GlobalVariables.secondaryColor,
                                     ),
                                     child: Text(
-                                      'Buy Again',
+                                      'View Details',
                                       style: TextStyle(
                                         fontFamily: 'SF Pro Display',
                                         color: GlobalVariables.primaryColor,
@@ -224,6 +297,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 ),
       bottomNavigationBar: CustomBottomNavigationBar(
         selectedIndex: _selectedIndex,
+        // onItemTapped: _onItemTapped,
       ),
     );
   }
