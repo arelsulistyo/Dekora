@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
+import 'package:dekora/services/transaction_service.dart';
 import 'package:dekora/models/cart_item_model.dart';
-import 'payment_success_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'payment_success_screen.dart'; // Import the new payment success screen
 
 class CheckoutScreen extends StatefulWidget {
   final List<CartItem> selectedItems;
 
-  const CheckoutScreen({
-    super.key,
-    required this.selectedItems,
-  });
+  const CheckoutScreen({super.key, required this.selectedItems});
 
   @override
   _CheckoutScreenState createState() => _CheckoutScreenState();
@@ -19,13 +18,85 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool productProtection = false;
   bool isLoading = false;
   String selectedShipping = 'Economic';
+  String shippingAddress = 'User Shipping Address'; // Collect from user
+  String paymentMethod = 'Credit Card'; // Collect from user
 
-  double _calculateTotalPrice() {
-    double total = 0;
-    for (var item in widget.selectedItems) {
-      total += item.price * item.quantity;
+  double _calculateTotalPayment() {
+    double productProtectionCost = 1.13;
+    double economicShippingCost = 1.0;
+    double regularShippingCost = 3.14;
+    double expressShippingCost = 6.02;
+    double servicesFee = 0.5;
+
+    double shippingCost = economicShippingCost;
+    if (selectedShipping == 'Regular') {
+      shippingCost = regularShippingCost;
+    } else if (selectedShipping == 'Express') {
+      shippingCost = expressShippingCost;
     }
-    return total;
+
+    double totalPayment = widget.selectedItems
+            .fold(0.0, (sum, item) => sum + item.price * item.quantity) +
+        servicesFee +
+        shippingCost;
+    if (productProtection) {
+      totalPayment += productProtectionCost * widget.selectedItems.length;
+    }
+
+    return totalPayment;
+  }
+
+  void _payNow() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    double totalPayment = _calculateTotalPayment();
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final transaction = {
+          'userId': user.uid,
+          'items': widget.selectedItems
+              .map((item) => {
+                    'flowerId': item.flowerId,
+                    'name': item.name,
+                    'imageUrl': item.imageUrl,
+                    'description': item.description,
+                    'price': item.price,
+                    'quantity': item.quantity,
+                  })
+              .toList(),
+          'totalAmount': totalPayment,
+          'shippingAddress': shippingAddress,
+          'paymentMethod': paymentMethod,
+          'shippingMethod': selectedShipping,
+          'productProtection': productProtection,
+        };
+
+        await TransactionService.createTransaction(transaction);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const PaymentSuccessScreen(),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Failed to create transaction: $e');
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Failed to create transaction'),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        ),
+      );
+    }
   }
 
   @override
@@ -43,10 +114,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       shippingCost = expressShippingCost;
     }
 
-    double totalPayment = _calculateTotalPrice() + servicesFee + shippingCost;
-    if (productProtection) {
-      totalPayment += productProtectionCost * widget.selectedItems.length;
-    }
+    double totalPayment = _calculateTotalPayment();
 
     return Scaffold(
       appBar: AppBar(
@@ -79,52 +147,52 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ...widget.selectedItems.map((item) => Row(
-                            children: [
-                              Image.network(
-                                item.imageUrl,
-                                height: 50,
-                                width: 50,
-                              ),
-                              const SizedBox(width: 16),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.name,
-                                    style: const TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: GlobalVariables.primaryColor,
-                                      fontFamily: 'SF Pro Display',
+                      // Display selected items
+                      ...widget.selectedItems.map((item) {
+                        return Row(
+                          children: [
+                            Image.network(
+                              item.imageUrl,
+                              height: 50,
+                              width: 50,
+                            ),
+                            const SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.name,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: GlobalVariables.primaryColor,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      '\$${item.price.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        color: GlobalVariables.primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        '\$${item.price.toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          color: GlobalVariables.primaryColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'SF Pro Display',
-                                        ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'x${item.quantity}',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black,
                                       ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'x${item.quantity}',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                          fontFamily: 'SF Pro Display',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          )),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      }).toList(),
                       const SizedBox(height: 20),
                       GestureDetector(
                         onTap: () {
@@ -148,7 +216,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.black,
-                                fontFamily: 'SF Pro Display',
                               ),
                             ),
                             const Spacer(),
@@ -158,7 +225,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 fontSize: 16,
                                 color: GlobalVariables.primaryColor,
                                 fontWeight: FontWeight.bold,
-                                fontFamily: 'SF Pro Display',
                               ),
                             ),
                           ],
@@ -171,20 +237,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
-                          fontFamily: 'SF Pro Display',
                         ),
                       ),
                       const SizedBox(height: 10),
                       RadioListTile<String>(
                         title: const Text(
                           'Economic',
-                          style: TextStyle(
-                              fontSize: 16, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(fontSize: 16),
                         ),
                         subtitle: const Text(
                           '7 Days Arrival Guarantee',
-                          style: TextStyle(
-                              fontSize: 12, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(fontSize: 12),
                         ),
                         value: 'Economic',
                         groupValue: selectedShipping,
@@ -198,7 +261,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                         activeColor: GlobalVariables.primaryColor,
@@ -206,13 +268,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       RadioListTile<String>(
                         title: const Text(
                           'Regular',
-                          style: TextStyle(
-                              fontSize: 16, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(fontSize: 16),
                         ),
                         subtitle: const Text(
                           '4 Days Arrival Guarantee',
-                          style: TextStyle(
-                              fontSize: 12, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(fontSize: 12),
                         ),
                         value: 'Regular',
                         groupValue: selectedShipping,
@@ -226,7 +286,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                         activeColor: GlobalVariables.primaryColor,
@@ -234,13 +293,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       RadioListTile<String>(
                         title: const Text(
                           'Express',
-                          style: TextStyle(
-                              fontSize: 16, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(fontSize: 16),
                         ),
                         subtitle: const Text(
                           '2 Days Arrival Guarantee',
-                          style: TextStyle(
-                              fontSize: 12, fontFamily: 'SF Pro Display'),
+                          style: TextStyle(fontSize: 12),
                         ),
                         value: 'Express',
                         groupValue: selectedShipping,
@@ -254,7 +311,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                         activeColor: GlobalVariables.primaryColor,
@@ -280,7 +336,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                       ],
@@ -293,16 +348,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.black,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                         const Spacer(),
                         Text(
-                          'Rp${_calculateTotalPrice().toStringAsFixed(2)}',
+                          '\$${widget.selectedItems.fold(0.0, (sum, item) => sum + item.price * item.quantity).toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                       ],
@@ -314,7 +367,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.black,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                         const Spacer(),
@@ -323,7 +375,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                       ],
@@ -336,7 +387,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.black,
-                              fontFamily: 'SF Pro Display',
                             ),
                           ),
                           const Spacer(),
@@ -345,7 +395,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             style: const TextStyle(
                               fontSize: 16,
                               color: GlobalVariables.primaryColor,
-                              fontFamily: 'SF Pro Display',
                             ),
                           ),
                         ],
@@ -357,7 +406,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.black,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                         const Spacer(),
@@ -366,7 +414,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                       ],
@@ -380,17 +427,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                         const Spacer(),
                         Text(
-                          'Rp${totalPayment.toStringAsFixed(2)}',
+                          '\$${totalPayment.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: GlobalVariables.primaryColor,
-                            fontFamily: 'SF Pro Display',
                           ),
                         ),
                       ],
@@ -400,20 +445,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       child: SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              isLoading = true;
-                            });
-                            Future.delayed(const Duration(seconds: 1), () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const PaymentSuccessScreen(),
-                                ),
-                              );
-                            });
-                          },
+                          onPressed: _payNow,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: GlobalVariables.primaryColor,
                             shape: RoundedRectangleBorder(
@@ -427,7 +459,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               fontSize: 20,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'SF Pro Display',
                             ),
                           ),
                         ),
