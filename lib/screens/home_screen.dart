@@ -3,6 +3,7 @@ import 'package:dekora/global_variables.dart';
 import 'package:dekora/models/flower_model.dart';
 import 'package:dekora/services/flower_service.dart';
 import 'package:dekora/widgets/custom_bottom_navigation_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'flower_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController searchController = TextEditingController();
   bool isLoading = true;
   int _selectedIndex = 0;
+  User? user;
 
   @override
   void initState() {
@@ -26,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     searchController.addListener(() {
       filterFlowers();
     });
+    user = FirebaseAuth.instance.currentUser;
   }
 
   Future<void> fetchFlowers() async {
@@ -128,9 +131,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'Hello, User!',
-                  style: TextStyle(
+                Text(
+                  'Hello, ${user?.displayName ?? 'User'}!',
+                  style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: GlobalVariables.primaryColor,
