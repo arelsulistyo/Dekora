@@ -3,6 +3,10 @@ import 'package:dekora/global_variables.dart';
 import 'package:dekora/screens/get_started_screen.dart';
 import 'package:dekora/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dekora/screens/change_address_screen.dart';
+import 'package:dekora/screens/change_password_screen.dart';
+import 'package:dekora/screens/about_dekora_screen.dart';
+import 'package:dekora/screens/terms_and_condition_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -100,9 +104,15 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   ProfileMenuItem(
                     icon: Icons.home,
-                    title: 'Account Settings',
+                    title: 'Your Address',
                     subtitle: 'Set your shipping address',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ChangeAddressScreen()),
+                      );
+                    },
                     backgroundColor: GlobalVariables.primaryColor,
                     textColor: Colors.white,
                     titleFontSize: 12,
@@ -112,27 +122,13 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.lock,
                     title: 'Account Security',
                     subtitle: 'Password, PIN, & Profile Verification',
-                    onTap: () {},
-                    backgroundColor: GlobalVariables.primaryColor,
-                    textColor: Colors.white,
-                    titleFontSize: 12,
-                    subtitleFontSize: 12,
-                  ),
-                  ProfileMenuItem(
-                    icon: Icons.notifications,
-                    title: 'Notification',
-                    subtitle: 'Adjust all kinds of Notification Messages',
-                    onTap: () {},
-                    backgroundColor: GlobalVariables.primaryColor,
-                    textColor: Colors.white,
-                    titleFontSize: 12,
-                    subtitleFontSize: 12,
-                  ),
-                  ProfileMenuItem(
-                    icon: Icons.privacy_tip,
-                    title: 'Account Privacy',
-                    subtitle: 'Set Data Usage',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ChangePasswordScreen()),
+                      );
+                    },
                     backgroundColor: GlobalVariables.primaryColor,
                     textColor: Colors.white,
                     titleFontSize: 12,
@@ -157,7 +153,13 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.info,
                     title: 'Get to know Dekora',
                     subtitle: 'Details about Dekora App',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AboutDekoraScreen()),
+                      );
+                    },
                     backgroundColor: GlobalVariables.primaryColor,
                     textColor: Colors.white,
                     titleFontSize: 12,
@@ -167,17 +169,14 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.description,
                     title: 'Terms & Condition',
                     subtitle: 'Terms and Condition applied on this app',
-                    onTap: () {},
-                    backgroundColor: GlobalVariables.primaryColor,
-                    textColor: Colors.white,
-                    titleFontSize: 12,
-                    subtitleFontSize: 12,
-                  ),
-                  ProfileMenuItem(
-                    icon: Icons.rate_review,
-                    title: 'Review This App',
-                    subtitle: 'Write a review and inputs for this app',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const TermsAndConditionsScreen()),
+                      );
+                    },
                     backgroundColor: GlobalVariables.primaryColor,
                     textColor: Colors.white,
                     titleFontSize: 12,
@@ -191,26 +190,22 @@ class ProfileScreen extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16.0),
-            color: Colors.white,
+            color: GlobalVariables.primaryColor,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 InkWell(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const GetStartedScreen()),
-                    );
+                    // Log out action
                   },
                   child: Row(
                     children: const [
-                      Icon(Icons.logout, color: GlobalVariables.primaryColor),
+                      Icon(Icons.logout, color: Colors.white),
                       SizedBox(width: 8),
                       Text(
                         'Log Out',
                         style: TextStyle(
-                          color: GlobalVariables.primaryColor,
+                          color: Colors.white,
                           fontFamily: 'SF Pro Display',
                         ),
                       ),
@@ -220,7 +215,7 @@ class ProfileScreen extends StatelessWidget {
                 const Text(
                   'Version 1.0.0.0',
                   style: TextStyle(
-                    color: GlobalVariables.primaryColor,
+                    color: Colors.white,
                     fontFamily: 'SF Pro Display',
                   ),
                 ),
