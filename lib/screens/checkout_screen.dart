@@ -1,9 +1,11 @@
+import 'package:dekora/screens/payment_webview_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dekora/global_variables.dart';
 import 'package:dekora/services/transaction_service.dart';
 import 'package:dekora/models/cart_item_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'payment_success_screen.dart'; // Import the new payment success screen
+import 'payment_webview_screen.dart'; // Import the new payment webview screen
 
 class CheckoutScreen extends StatefulWidget {
   final List<CartItem> selectedItems;
@@ -19,7 +21,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool isLoading = false;
   String selectedShipping = 'Economic';
   String shippingAddress = 'User Shipping Address'; // Collect from user
-  String paymentMethod = 'Credit Card'; // Collect from user
+  String paymentMethod =
+      'gopay'; // Midtrans Snap supports multiple payment methods
 
   double _calculateTotalPayment() {
     double productProtectionCost = 1.13;
@@ -43,7 +46,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       totalPayment += productProtectionCost * widget.selectedItems.length;
     }
 
-    return totalPayment;
+    return totalPayment.roundToDouble();
   }
 
   void _payNow() async {
@@ -68,19 +71,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     'quantity': item.quantity,
                   })
               .toList(),
-          'totalAmount': totalPayment,
+          'totalAmount': totalPayment.toInt(), // Convert to integer
           'shippingAddress': shippingAddress,
           'paymentMethod': paymentMethod,
           'shippingMethod': selectedShipping,
           'productProtection': productProtection,
         };
 
-        await TransactionService.createTransaction(transaction);
+        final snapToken =
+            await TransactionService.createTransaction(transaction);
 
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PaymentSuccessScreen(),
+            builder: (context) => PaymentWebView(snapToken: snapToken),
           ),
         );
       }
