@@ -93,18 +93,50 @@ class _ShoppingCartState extends State<ShoppingCart> {
         _isUpdating = false;
       });
     } catch (e) {
-      print('Failed to update cart items: $e');
       setState(() {
         _isUpdating = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Failed to update cart items'),
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-        ),
-      );
+      _showStockExceededDialog(e.toString());
     }
+  }
+
+  void _showStockExceededDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Stock Exceeded',
+            style: TextStyle(
+              color: GlobalVariables.primaryColor,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'SF Pro Display',
+            ),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(
+              color: GlobalVariables.primaryColor,
+              fontFamily: 'SF Pro Display',
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                  color: GlobalVariables.primaryColor,
+                  fontFamily: 'SF Pro Display',
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showDeleteConfirmationDialog() {
@@ -253,6 +285,31 @@ class _ShoppingCartState extends State<ShoppingCart> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              Image.asset(
+                                'images/cart_empty.png',
+                                width: 200,
+                                height: 200,
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'Cart is Empty',
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: GlobalVariables.primaryColor,
+                                  fontFamily: 'SF Pro Display',
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                'Add items by browsing',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: GlobalVariables.primaryColor,
+                                  fontFamily: 'SF Pro Display',
+                                ),
+                              ),
+                              const SizedBox(height: 70),
                               ElevatedButton(
                                 onPressed: () {
                                   Navigator.pushNamedAndRemoveUntil(
@@ -261,16 +318,17 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: GlobalVariables.primaryColor,
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 32.0, vertical: 16.0),
+                                      horizontal: 48.0, vertical: 16.0),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderRadius: BorderRadius.circular(20.0),
                                   ),
                                 ),
                                 child: const Text(
-                                  'Browse',
+                                  'Start Browsing',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontFamily: 'SF Pro Display',
+                                    fontSize: 18,
                                   ),
                                 ),
                               ),

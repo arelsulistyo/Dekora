@@ -53,7 +53,8 @@ class CartService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to update cart item');
+      final errorData = json.decode(response.body);
+      throw errorData['message']; // Throwing the error message directly
     }
   }
 
@@ -76,6 +77,22 @@ class CartService {
       return jsonResponse.map((item) => CartItem.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load cart items');
+    }
+  }
+
+  static Future<int> fetchItemStock(String flowerId) async {
+    final response = await http.get(
+      Uri.parse('http://localhost:5000/cart/stock/$flowerId'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['stock'];
+    } else {
+      throw Exception('Failed to fetch item stock');
     }
   }
 }
