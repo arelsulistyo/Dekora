@@ -6,7 +6,7 @@ import 'package:dekora/models/transaction_model.dart';
 class TransactionService {
   static const String _baseUrl = 'http://localhost:5000/transactions';
 
-  static Future<void> createTransaction(
+  static Future<String> createTransaction(
       Map<String, dynamic> transaction) async {
     final User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -26,7 +26,10 @@ class TransactionService {
     print(response.statusCode);
     print(response.body);
 
-    if (response.statusCode != 201) {
+    if (response.statusCode == 201) {
+      final responseData = json.decode(response.body);
+      return responseData['snapToken'];
+    } else {
       throw Exception('Failed to create transaction');
     }
   }

@@ -1,4 +1,5 @@
 import 'package:dekora/screens/change_address_screen.dart';
+import 'package:dekora/screens/payment_webview_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +8,9 @@ import 'package:dekora/services/transaction_service.dart';
 import 'package:dekora/models/cart_item_model.dart';
 import 'payment_success_screen.dart';
 import 'package:dekora/screens/change_address_screen.dart'; // Import the EditAddressScreen
+import 'package:firebase_auth/firebase_auth.dart';
+import 'payment_success_screen.dart'; // Import the new payment success screen
+ // Import the new payment webview screen
 
 class CheckoutScreen extends StatefulWidget {
   final List<CartItem> selectedItems;
@@ -21,6 +25,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool productProtection = false;
   bool isLoading = false;
   String selectedShipping = 'Economic';
+
   String recipientName = '';
   String addressLine1 = '';
   String addressLine2 = '';
@@ -111,6 +116,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
   }
 
+  String shippingAddress = 'User Shipping Address'; // Collect from user
+  String paymentMethod =
+      'gopay'; // Midtrans Snap supports multiple payment methods
+
+
   double _calculateTotalPayment() {
     double productProtectionCost = 1500;
     double economicShippingCost = 1000;
@@ -133,7 +143,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       totalPayment += productProtectionCost * widget.selectedItems.length;
     }
 
-    return totalPayment;
+    return totalPayment.roundToDouble();
   }
 
   void _payNow() async {
@@ -174,20 +184,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     'quantity': item.quantity,
                   })
               .toList(),
-          'totalAmount': totalPayment,
+
+          'totalAmount': totalPayment.toInt(), // Convert to integer
+
+
           'recipientName': recipientName,
+
           'shippingAddress': shippingAddress,
           'paymentMethod': paymentMethod,
           'shippingMethod': selectedShipping,
           'productProtection': productProtection,
         };
 
-        await TransactionService.createTransaction(transaction);
+        final snapToken =
+            await TransactionService.createTransaction(transaction);
 
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PaymentSuccessScreen(),
+            builder: (context) => PaymentWebView(snapToken: snapToken),
           ),
         );
       }
