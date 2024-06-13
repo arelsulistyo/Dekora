@@ -104,8 +104,8 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   ProfileMenuItem(
                     icon: Icons.home,
-                    title: 'Your Address',
-                    subtitle: 'Set your shipping address',
+                    title: 'Address and Recipient',
+                    subtitle: 'Set your shipping address and other info',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -195,8 +195,14 @@ class ProfileScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 InkWell(
-                  onTap: () {
-                    // Log out action
+                  onTap: () async {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const GetStartedScreen()),
+                      (Route<dynamic> route) => false,
+                    );
                   },
                   child: Row(
                     children: const [

@@ -1,9 +1,12 @@
+import 'package:dekora/screens/change_address_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dekora/global_variables.dart';
 import 'package:dekora/services/transaction_service.dart';
 import 'package:dekora/models/cart_item_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'payment_success_screen.dart'; // Import the new payment success screen
+import 'payment_success_screen.dart';
+import 'package:dekora/screens/change_address_screen.dart'; // Import the EditAddressScreen
 
 class CheckoutScreen extends StatefulWidget {
   final List<CartItem> selectedItems;
@@ -18,15 +21,102 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool productProtection = false;
   bool isLoading = false;
   String selectedShipping = 'Economic';
-  String shippingAddress = 'User Shipping Address'; // Collect from user
-  String paymentMethod = 'Credit Card'; // Collect from user
+  String recipientName = '';
+  String addressLine1 = '';
+  String addressLine2 = '';
+  String city = '';
+  String postalCode = '';
+  String paymentMethod = 'Credit Card';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecipientDetails();
+  }
+
+  Future<void> _loadRecipientDetails() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (doc.exists) {
+          setState(() {
+            recipientName = doc.data()?['name'] ?? '';
+            addressLine1 = doc.data()?['addressLine1'] ?? '';
+            addressLine2 = doc.data()?['addressLine2'] ?? '';
+            city = doc.data()?['city'] ?? '';
+            postalCode = doc.data()?['postalCode'] ?? '';
+          });
+        }
+
+        // Check if recipient details are missing
+        if (recipientName.isEmpty ||
+            addressLine1.isEmpty ||
+            city.isEmpty ||
+            postalCode.isEmpty) {
+          _navigateToEditAddressScreen();
+        }
+      }
+    } catch (e) {
+      print('Failed to load recipient details: $e');
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void _navigateToEditAddressScreen() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            const ChangeAddressScreen(), // Make sure this screen exists
+      ),
+    );
+  }
+
+  Future<void> _updateRecipientDetails(
+      String newRecipientName,
+      String newAddressLine1,
+      String newAddressLine2,
+      String newCity,
+      String newPostalCode) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({
+        'name': newRecipientName,
+        'addressLine1': newAddressLine1,
+        'addressLine2': newAddressLine2,
+        'city': newCity,
+        'postalCode': newPostalCode,
+      });
+    }
+    setState(() {
+      recipientName = newRecipientName;
+      addressLine1 = newAddressLine1;
+      addressLine2 = newAddressLine2;
+      city = newCity;
+      postalCode = newPostalCode;
+    });
+  }
 
   double _calculateTotalPayment() {
-    double productProtectionCost = 1.13;
-    double economicShippingCost = 1.0;
-    double regularShippingCost = 3.14;
-    double expressShippingCost = 6.02;
-    double servicesFee = 0.5;
+    double productProtectionCost = 1500;
+    double economicShippingCost = 1000;
+    double regularShippingCost = 3000;
+    double expressShippingCost = 6000;
+    double servicesFee = 1000;
 
     double shippingCost = economicShippingCost;
     if (selectedShipping == 'Regular') {
@@ -47,11 +137,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _payNow() async {
+    if (recipientName.isEmpty ||
+        addressLine1.isEmpty ||
+        city.isEmpty ||
+        postalCode.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+              'Please provide complete recipient and address details'),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       isLoading = true;
     });
 
     double totalPayment = _calculateTotalPayment();
+    String shippingAddress = '$addressLine1, $addressLine2, $city, $postalCode';
 
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -69,6 +175,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   })
               .toList(),
           'totalAmount': totalPayment,
+          'recipientName': recipientName,
           'shippingAddress': shippingAddress,
           'paymentMethod': paymentMethod,
           'shippingMethod': selectedShipping,
@@ -101,11 +208,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double productProtectionCost = 1.13;
-    double economicShippingCost = 1.0;
-    double regularShippingCost = 3.14;
-    double expressShippingCost = 6.02;
-    double servicesFee = 0.5;
+    double productProtectionCost = 1500;
+    double economicShippingCost = 1000;
+    double regularShippingCost = 3000;
+    double expressShippingCost = 6000;
+    double servicesFee = 1000;
 
     double shippingCost = economicShippingCost;
     if (selectedShipping == 'Regular') {
@@ -171,7 +278,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 Row(
                                   children: [
                                     Text(
-                                      '\$${item.price.toStringAsFixed(2)}',
+                                      'Rp${item.price.toStringAsFixed(2)}',
                                       style: const TextStyle(
                                         fontSize: 20,
                                         color: GlobalVariables.primaryColor,
@@ -220,7 +327,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ),
                             const Spacer(),
                             Text(
-                              '\$${productProtectionCost.toStringAsFixed(2)} x${widget.selectedItems.length}',
+                              'Rp ${productProtectionCost.toStringAsFixed(2)} x${widget.selectedItems.length}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 color: GlobalVariables.primaryColor,
@@ -257,7 +364,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           });
                         },
                         secondary: Text(
-                          '\$${economicShippingCost.toStringAsFixed(2)}',
+                          'Rp ${economicShippingCost.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
@@ -282,7 +389,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           });
                         },
                         secondary: Text(
-                          '\$${regularShippingCost.toStringAsFixed(2)}',
+                          'Rp${regularShippingCost.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
@@ -307,13 +414,148 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           });
                         },
                         secondary: Text(
-                          '\$${expressShippingCost.toStringAsFixed(2)}',
+                          'Rp${expressShippingCost.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
                           ),
                         ),
                         activeColor: GlobalVariables.primaryColor,
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Recipient Information',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          const Icon(Icons.person,
+                              color: GlobalVariables.primaryColor),
+                          const SizedBox(width: 8),
+                          Text(
+                            recipientName.isNotEmpty
+                                ? recipientName
+                                : 'Recipient name not set',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const Spacer(),
+                          ElevatedButton(
+                            onPressed: () async {
+                              // Show dialog to edit recipient details
+                              final result =
+                                  await showDialog<Map<String, String>>(
+                                context: context,
+                                builder: (context) {
+                                  final recipientNameController =
+                                      TextEditingController(
+                                          text: recipientName);
+                                  final addressLine1Controller =
+                                      TextEditingController(text: addressLine1);
+                                  final addressLine2Controller =
+                                      TextEditingController(text: addressLine2);
+                                  final cityController =
+                                      TextEditingController(text: city);
+                                  final postalCodeController =
+                                      TextEditingController(text: postalCode);
+                                  return AlertDialog(
+                                    title: const Text('Edit Recipient Details'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextField(
+                                          controller: recipientNameController,
+                                          decoration: const InputDecoration(
+                                              labelText: 'Recipient Name'),
+                                        ),
+                                        TextField(
+                                          controller: addressLine1Controller,
+                                          decoration: const InputDecoration(
+                                              labelText: 'Address Line 1'),
+                                        ),
+                                        TextField(
+                                          controller: addressLine2Controller,
+                                          decoration: const InputDecoration(
+                                              labelText: 'Address Line 2'),
+                                        ),
+                                        TextField(
+                                          controller: cityController,
+                                          decoration: const InputDecoration(
+                                              labelText: 'City'),
+                                        ),
+                                        TextField(
+                                          controller: postalCodeController,
+                                          decoration: const InputDecoration(
+                                              labelText: 'Postal Code'),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop({
+                                            'recipientName':
+                                                recipientNameController.text,
+                                            'addressLine1':
+                                                addressLine1Controller.text,
+                                            'addressLine2':
+                                                addressLine2Controller.text,
+                                            'city': cityController.text,
+                                            'postalCode':
+                                                postalCodeController.text,
+                                          });
+                                        },
+                                        child: const Text('Save'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+
+                              if (result != null) {
+                                await _updateRecipientDetails(
+                                    result['recipientName']!,
+                                    result['addressLine1']!,
+                                    result['addressLine2']!,
+                                    result['city']!,
+                                    result['postalCode']!);
+                              }
+                            },
+                            child: const Text('Edit'),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on,
+                              color: GlobalVariables.primaryColor),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              addressLine1.isNotEmpty
+                                  ? '$addressLine1, $addressLine2, $city, $postalCode'
+                                  : 'Address not set',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                              overflow: TextOverflow.visible,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -352,7 +594,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          '\$${widget.selectedItems.fold(0.0, (sum, item) => sum + item.price * item.quantity).toStringAsFixed(2)}',
+                          'Rp${widget.selectedItems.fold(0.0, (sum, item) => sum + item.price * item.quantity).toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
@@ -371,7 +613,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          '\$${shippingCost.toStringAsFixed(2)}',
+                          'Rp${shippingCost.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
@@ -391,7 +633,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ),
                           const Spacer(),
                           Text(
-                            '\$${(productProtectionCost * widget.selectedItems.length).toStringAsFixed(2)}',
+                            'Rp${(productProtectionCost * widget.selectedItems.length).toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 16,
                               color: GlobalVariables.primaryColor,
@@ -410,7 +652,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          '\$${servicesFee.toStringAsFixed(2)}',
+                          'Rp${servicesFee.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             color: GlobalVariables.primaryColor,
@@ -431,7 +673,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          '\$${totalPayment.toStringAsFixed(2)}',
+                          'Rp${totalPayment.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
