@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dekora/global_variables.dart';
 
 class EditAddressScreen extends StatefulWidget {
@@ -9,15 +11,14 @@ class EditAddressScreen extends StatefulWidget {
   final String city;
   final String postalCode;
 
-  const EditAddressScreen({
-    Key? key,
+  EditAddressScreen({
     required this.name,
     required this.phoneNumber,
     required this.addressLine1,
     required this.addressLine2,
     required this.city,
     required this.postalCode,
-  }) : super(key: key);
+  });
 
   @override
   _EditAddressScreenState createState() => _EditAddressScreenState();
@@ -31,6 +32,9 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
   late TextEditingController cityController;
   late TextEditingController postalCodeController;
 
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +44,20 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
     addressLine2Controller = TextEditingController(text: widget.addressLine2);
     cityController = TextEditingController(text: widget.city);
     postalCodeController = TextEditingController(text: widget.postalCode);
+  }
+
+  Future<void> _saveAddress() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await _firestore.collection('users').doc(user.uid).set({
+        'name': nameController.text,
+        'phoneNumber': phoneNumberController.text,
+        'addressLine1': addressLine1Controller.text,
+        'addressLine2': addressLine2Controller.text,
+        'city': cityController.text,
+        'postalCode': postalCodeController.text,
+      }, SetOptions(merge: true));
+    }
   }
 
   @override
@@ -77,7 +95,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                   TextField(
                     controller: nameController,
                     decoration: InputDecoration(
-                      labelText: 'Name',
+                      labelText: 'Recipient Name',
                       labelStyle: TextStyle(
                         color: GlobalVariables.primaryColor,
                         fontFamily: 'SF Pro Display',
@@ -202,10 +220,24 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                   const SizedBox(height: 32.0),
                   Center(
                     child: SizedBox(
-                      width: 200, // Set the desired width here
+                      width: 200,
                       child: OutlinedButton(
-                        onPressed: () {
-                          // Save the new address details and navigate back
+                        onPressed: () async {
+                          if (nameController.text.isEmpty ||
+                              phoneNumberController.text.isEmpty ||
+                              addressLine1Controller.text.isEmpty ||
+                              addressLine2Controller.text.isEmpty ||
+                              cityController.text.isEmpty ||
+                              postalCodeController.text.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('All fields must be filled.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+                          await _saveAddress();
                           Navigator.pop(context, {
                             'name': nameController.text,
                             'phoneNumber': phoneNumberController.text,

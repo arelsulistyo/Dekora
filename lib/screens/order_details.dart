@@ -15,11 +15,34 @@ class OrderDetailsScreen extends StatefulWidget {
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   bool showMoreItems = false;
 
-  final double subtotalForProduct = 500000.0;
-  final double subtotalForShipment = 50000.0;
-  final double subtotalForProtection = 25000.0;
-  final double servicesFee = 10000.0;
-  final double totalPayment = 585000.0;
+  double get subtotalForProduct => widget.transaction.items
+      .map((item) => item.price * item.quantity)
+      .reduce((value, element) => value + element);
+
+  double get subtotalForShipment {
+    switch (widget.transaction.shippingMethod) {
+      case 'Economic':
+        return 1000.0;
+      case 'Regular':
+        return 3000.0;
+      case 'Express':
+        return 6000.0;
+      default:
+        return 0.0; // Default value if shipping method is not recognized
+    }
+  }
+
+  double get subtotalForProtection => widget.transaction.productProtection
+      ? widget.transaction.items.length * 1500.0
+      : 0.0;
+
+  final double servicesFee = 1000.0;
+
+  double get totalPayment =>
+      subtotalForProduct +
+      subtotalForShipment +
+      subtotalForProtection +
+      servicesFee;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +86,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         color: Colors.black.withOpacity(0.1),
                         spreadRadius: 5,
                         blurRadius: 7,
-                        offset: Offset(0, 3), // changes position of shadow
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
@@ -74,8 +97,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         children: [
                           Icon(Icons.shopping_cart, color: Colors.white),
                           const SizedBox(width: 8),
-                          const Text(
-                            'Order Finished\n2 Juni 2024',
+                          Text(
+                            'Order Finished\n${widget.transaction.date.toLocal().toString().split(' ')[0]}',
                             style: TextStyle(
                               fontFamily: 'SF Pro Display',
                               fontStyle: FontStyle.italic,
@@ -118,36 +141,33 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Order Description',
-                        style: TextStyle(
-                          fontFamily: 'SF Pro Display',
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
                       const Divider(color: Colors.white),
                       const SizedBox(height: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Total Purchase',
-                            style: TextStyle(
-                              fontFamily: 'SF Pro Display',
-                              fontStyle: FontStyle.italic,
-                              fontWeight: FontWeight.w300,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            'Rp ${widget.transaction.totalAmount}',
-                            style: const TextStyle(
-                              fontFamily: 'SF Pro Display',
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Total Purchase',
+                                style: TextStyle(
+                                  fontFamily: 'SF Pro Display',
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.w300,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Text(
+                                'Rp${widget.transaction.items.first.price * widget.transaction.items.first.quantity}',
+                                style: const TextStyle(
+                                  fontFamily: 'SF Pro Display',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -198,8 +218,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                           color: Colors.black.withOpacity(0.1),
                                           spreadRadius: 5,
                                           blurRadius: 7,
-                                          offset: Offset(0,
-                                              3), // changes position of shadow
+                                          offset: Offset(0, 3),
                                         ),
                                       ],
                                     ),
@@ -240,14 +259,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                               ],
                                             ),
                                           ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        const Text(
-                                          'Order Description',
-                                          style: TextStyle(
-                                            fontFamily: 'SF Pro Display',
-                                            color: Colors.white,
-                                          ),
                                         ),
                                         const SizedBox(height: 8),
                                         const Divider(color: Colors.white),
@@ -355,28 +366,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Shipping Number',
-                          style: TextStyle(
-                            fontFamily: 'SF Pro Display',
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          widget.transaction.paymentMethod,
-                          style: const TextStyle(
-                            fontFamily: 'SF Pro Display',
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Sena',
-                          style: const TextStyle(
-                            fontFamily: 'SF Pro Display',
-                            color: Colors.white,
-                          ),
-                        ),
-                        const Text(
                           'Address',
                           style: TextStyle(
                             fontFamily: 'SF Pro Display',
@@ -422,6 +411,36 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
+                    Column(
+                      children: widget.transaction.items.map((item) {
+                        return Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${item.name} x${item.quantity}',
+                                  style: const TextStyle(
+                                    fontFamily: 'SF Pro Display',
+                                    color: GlobalVariables.primaryColor,
+                                  ),
+                                ),
+                                Text(
+                                  'Rp ${item.price * item.quantity}',
+                                  style: const TextStyle(
+                                    fontFamily: 'SF Pro Display',
+                                    color: GlobalVariables.primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        );
+                      }).toList(),
+                    ),
+                    const Divider(color: GlobalVariables.primaryColor),
+                    const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
